@@ -2,160 +2,111 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title> Angel's DryCleaners </title>
+  <title>Admin Portal - Angel's Dry Cleaners</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <!-- Bootstrap CSS -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 
+  <style>
+      /* Utility to make the Hero section fill the screen like an App */
+      .full-screen-hero {
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          padding-top: 80px; /* Space for fixed navbar */
+      }
+  </style>
 </head>
 <body>
 
-  <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
-      <a class="navbar-brand fw-bold" href="#"> Angel's DryCleaners </a>
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+      <div class="container">
+        
+        <a class="navbar-brand d-flex align-items-center" href="#">
+          <i class="bi bi-droplet-fill me-2"></i>
+          Angel's Admin Portal
+        </a>
 
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto">
-          <li class="nav-item">
-            <a class="nav-link" href="#">Features</a>
-          </li>
-          <li class="nav-item">
-            <a class="btn btn-outline-light ms-2" href="#">Login</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
-
-
-
-    <!-- Hero Section -->
-  <section class="bg-light py-5">
-    <div class="container">
-      <div class="row align-items-center">
-
-        <div class="col-md-6">
-          <h1 class="fw-bold mb-3">
-            Building Trust with Crisp Collars <br>
-            <span class="text-primary">Smartly & Easily</span>
-          </h1>
-          <p class="text-muted mb-4">
-            Track daily clothes, delivery schedules, worker expenses,
-            and profits — all in one simple dashboard.
-          </p>
-          <a href="#" class="btn btn-primary btn-lg me-2">Get Started</a>
-          <a href="#" class="btn btn-outline-secondary btn-lg">Login</a>
-        </div>
-
-        <div class="col-md-6 text-center">
-          <img src="https://images.unsplash.com/photo-1549037173-e3b717902c57?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8ZHJ5JTIwY2xlYW5pbmd8ZW58MHx8MHx8fDA%3D"
-               class="img-fluid"
-               alt="Dry Cleaning Illustration">
-        </div>
+        <span class="navbar-text text-white-50 ms-auto d-none d-md-block">
+            <i class="bi bi-wifi me-1"></i> System Online
+        </span>
 
       </div>
-    </div>
-  </section>
+    </nav>
 
+    <section class="hero full-screen-hero">
+      <div class="container">
+        <div class="row align-items-center justify-content-between">
+            
+            <div class="col-lg-6 mb-5 mb-lg-0">
+                <div class="hero-text">
+                    <div class="hero-badge">
+                        <span class="pulse"></span>
+                        v2.0.4 Live
+                    </div>
 
-
-    <!-- Features Section -->
-  <section class="py-5">
-    <div class="container text-center">
-      <h2 class="fw-bold mb-4">What You Can Do</h2>
-
-      <div class="row g-4">
-
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">Daily Clothes Entry</h5>
-              <p class="card-text text-muted">
-                Log how many clothes are ironed or sent for dry cleaning every day.
-              </p>
+                    <h1 class="fw-bold mb-3">Shop Management System</h1>
+                    <p class="lead text-muted mb-5">
+                        Centralized control for your dry cleaning business. <br>
+                        Track daily logistics, staff expenses, and revenue.
+                    </p>
+                    
+                    <div class="row g-4">
+                        <div class="col-auto">
+                            <h3 class="fw-bold text-primary mb-0">100%</h3>
+                            <small class="text-muted">Secure Data</small>
+                        </div>
+                        <div class="col-auto border-start ps-4">
+                            <h3 class="fw-bold text-primary mb-0">24/7</h3>
+                            <small class="text-muted">Uptime</small>
+                        </div>
+                        <div class="col-auto border-start ps-4">
+                            <h3 class="fw-bold text-primary mb-0">Cloud</h3>
+                            <small class="text-muted">Auto-Backup</small>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">Profit Tracking</h5>
-              <p class="card-text text-muted">
-                Automatically calculate daily profit and monthly income.
-              </p>
+            <div class="col-lg-5">
+                <div class="card feature-card border-0 shadow-lg p-4">
+                    <div class="card-body text-center">
+                        
+                        <div class="icon-circle mx-auto mb-4" style="width: 80px; height: 80px; font-size: 2rem;">
+                            <i class="bi bi-person-circle"></i>
+                        </div>
+
+                        <h4 class="fw-bold mb-1">Owner Access</h4>
+                        <p class="text-muted small mb-4">Identify yourself to enter the dashboard.</p>
+
+                        <div class="d-grid gap-3">
+                            <a href="login.html" class="btn btn-primary btn-lg">
+                                Log In to Dashboard
+                            </a>
+                            <button class="btn btn-outline-secondary" disabled>
+                                Staff Login (Disabled)
+                            </button>
+                        </div>
+
+                        <hr class="my-4">
+                        
+                        <div class="text-start bg-light p-3 rounded-3">
+                            <small class="d-block text-muted">
+                                <i class="bi bi-info-circle-fill text-primary me-1"></i> 
+                                <strong>Notice:</strong> Server maintenance scheduled for Sunday (2:00 AM).
+                            </small>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
 
-        <div class="col-md-4">
-          <div class="card h-100 shadow-sm">
-            <div class="card-body">
-              <h5 class="card-title">Worker Expense Log</h5>
-              <p class="card-text text-muted">
-                Keep track of how much money is spent on workers daily.
-              </p>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-
-
-
-    <!-- How It Works -->
-  <section class="bg-light py-5">
-    <div class="container text-center">
-      <h2 class="fw-bold mb-4">How It Works</h2>
-
-      <div class="row g-4">
-        <div class="col-md-4">
-          <h5>1. Add Daily Data</h5>
-          <p class="text-muted">Enter clothes received, delivery time, and expenses.</p>
-        </div>
-        <div class="col-md-4">
-          <h5>2. Track Progress</h5>
-          <p class="text-muted">Monitor orders, income, and expenses easily.</p>
-        </div>
-        <div class="col-md-4">
-          <h5>3. Grow Your Business</h5>
-          <p class="text-muted">Make smarter decisions using clear insights.</p>
         </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-
-
-
-    <!-- Call To Action -->
-  <section class="py-5 text-center">
-    <div class="container">
-      <h2 class="fw-bold mb-3">Start Managing Smarter Today</h2>
-      <p class="text-muted mb-4">
-        Designed specially for dry cleaning business owners.
-      </p>
-      <a href="#" class="btn btn-success btn-lg">Create Account</a>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <footer class="bg-dark text-light text-center py-3">
-    <p class="mb-0">&copy; 2026  Angel's DryCleaners . All rights reserved.</p>
-  </footer>
-
-  <!-- Bootstrap JS -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
-
