@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Angel's Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body {
+            /* Use the same gradient background as the Hero section */
+            background: linear-gradient(135deg, #E8F6F3, #D1F2EB);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-card {
+            max-width: 400px;
+            width: 100%;
+            border-radius: 20px;
+            border: none;
+        }
+
+        .login-icon {
+            width: 80px;
+            height: 80px;
+            background-color: var(--bg-light);
+            color: var(--primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="login-card card shadow-lg p-4 mx-auto feature-card">
+            <div class="card-body">
+                
+                <div class="login-icon shadow-sm">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+
+                <div class="text-center mb-4">
+                    <h4 class="fw-bold" style="color: var(--text-dark);">Owner Access</h4>
+                    <p class="text-muted small">Enter your credentials to manage the shop.</p>
+                </div>
+
+                <form id="loginForm">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-muted">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                            <input type="text" class="form-control border-start-0" id="username" placeholder="admin" required>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label small fw-bold text-muted">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light border-end-0"><i class="bi bi-key"></i></span>
+                            <input type="password" class="form-control border-start-0" id="password" placeholder="••••••" required>
+                        </div>
+                    </div>
+
+                    <div class="d-grid mb-3">
+                        <button type="submit" class="btn btn-primary py-2 shadow-sm">
+                            Secure Login <i class="bi bi-arrow-right-short"></i>
+                        </button>
+                    </div>
+
+                    <div class="text-center">
+                        <a href="index.html" class="small text-decoration-none text-muted">
+                            <i class="bi bi-arrow-left"></i> Back to Homepage
+                        </a>
+                    </div>
+                </form>
+
+            </div>
+        </div>
+        
+        <div class="text-center mt-4">
+            <small class="text-muted opacity-75">&copy; 2026 Angel's Dry Cleaners System</small>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const user = document.getElementById('username').value;
+            const pass = document.getElementById('password').value;
+
+            // Simple Logic for Demo
+            if(user === "admin" && pass === "admin") {
+                // Success: Redirect to Dashboard
+                window.location.href = "dashboard.html";
+            } else {
+                // Error: Shake the card (Optional) or just alert
+                alert("Invalid Credentials! (Try: admin / admin)");
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,416 @@
+/* ===============================
+   THEME VARIABLES
+================================ */
+:root {
+  --primary: #0F766E;
+  --primary-dark: #115E59;
+  --accent: #2DD4BF;
+  --bg-light: #E8F6F3;
+  --bg-page: #F9FAFB;
+  --text-dark: #1F2933;
+}
+
+/* ===============================
+   GLOBAL
+================================ */
+body {
+  font-family: "Segoe UI", sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-dark);
+  
+}
+
+/* ===============================
+   NAVBAR
+================================ */
+.navbar {
+  transition: all 0.3s ease;
+  background-color: var(--primary);
+}
+
+.navbar.scrolled {
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.4rem;
+  letter-spacing: 0.5px;
+  color: #ffffff !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  color: #e6fffa !important;
+}
+
+.navbar .btn {
+  border-radius: 20px;
+  padding: 6px 18px;
+}
+
+/* ===============================
+   HERO SECTION
+================================ */
+.hero {
+  background: linear-gradient(135deg, #E8F6F3, #D1F2EB);
+  padding: 130px 0 110px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* HERO LAYOUT */
+.hero-content {
+  display: flex;
+  align-items: center;
+  gap: 90px;
+}
+
+/* ICON */
+.hero-icon i {
+  font-size: 3.6rem;
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.15);
+  padding: 22px;
+  border-radius: 50%;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  margin-right: 20px;
+  align-self: flex-start;
+  margin-top: 8px;
+}
+
+/* TEXT */
+.hero-text {
+  padding-right: 20px;
+}
+
+.hero-text h1 {
+  font-size: 2.8rem;
+  margin-bottom: 14px;
+}
+
+.hero-text p {
+  font-size: 1.05rem;
+  opacity: 0.95;
+  margin-bottom: 28px;
+  line-height: 1.6;
+}
+
+/* BADGE */
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.18);
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  margin-bottom: 18px;
+}
+
+/* PULSE */
+.pulse {
+  width: 8px;
+  height: 8px;
+  background: #68D391;
+  border-radius: 50%;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(1.8); opacity: 0; }
+}
+
+/* BUTTONS */
+.hero-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+}
+
+/* DECORATIVE CIRCLE */
+.hero::after {
+  content: "";
+  position: absolute;
+  top: -120px;
+  right: -140px;
+  width: 360px;
+  height: 360px;
+  background: rgba(178, 245, 234, 0.18);
+  border-radius: 50%;
+}
+
+/* RESPONSIVE */
+@media (max-width: 768px) {
+  .hero-content {
+    flex-direction: column;
+    text-align: center;
+    gap: 50px;
+  }
+
+  .hero-buttons {
+    justify-content: center;
+  }
+}
+
+
+
+/* ===============================
+   BUTTONS
+================================ */
+.btn-primary {
+  background-color: var(--primary);
+  border-color: var(--primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+.btn-outline-secondary {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
+.btn-outline-secondary:hover {
+  background-color: var(--primary);
+  color: #ffffff;
+}
+
+/* ===============================
+   FEATURES
+================================ */
+.feature-card {
+  background-color: #ffffff;
+  border-radius: 18px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.feature-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.12);
+}
+
+.icon-circle {
+  width: 60px;
+  height: 60px;
+  background-color: var(--accent);
+  color: #065F46;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  margin: 0 auto 16px;
+}
+
+/* How It Works Icons */
+.theme-icon {
+  color: var(--primary);
+}
+
+
+
+/* ===============================
+   FOOTER
+================================ */
+footer {
+  background-color: var(--primary-dark);
+  color: #E6FFFA;
+  padding: 30px 0;
+}
+
+footer small {
+  color: #B2F5EA;
+  display: block;
+  margin-top: 6px;
+  font-size: 0.85rem;
+  letter-spacing: 0.3px;
+  opacity: 0.9;
+}
+
+
+
+/* ===============================
+   ANIMATIONS
+================================ */
+@keyframes fadeUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes zoomIn {
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+
+
+
+/* ===============================
+   LOGIN PAGE STYLES
+================================ */
+
+/* Use this class on the <body> tag of login.html */
+.login-body {
+  /* Using the Hero Gradient for consistency */
+  background: linear-gradient(135deg, #E8F6F3, #D1F2EB);
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-card {
+  background: #ffffff;
+  width: 100%;
+  max-width: 420px;
+  border-radius: 24px;
+  border: none;
+  box-shadow: 0 20px 40px rgba(15, 118, 110, 0.15); /* Soft teal shadow */
+  padding: 3rem;
+}
+
+.login-icon {
+  width: 70px;
+  height: 70px;
+  background-color: var(--bg-light);
+  color: var(--primary);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.8rem;
+  margin: 0 auto 1.5rem;
+}
+
+/* ===============================
+   FORM ELEMENT UPDATES
+================================ */
+
+.form-control {
+  border-radius: 12px;
+  padding: 12px 15px;
+  border: 1px solid #e2e8f0;
+  background-color: #f8fafc;
+}
+
+.form-control:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 4px rgba(15, 118, 110, 0.1);
+  background-color: #ffffff;
+}
+
+/* Updates the existing btn-primary to be chunkier */
+.btn-primary {
+  border-radius: 12px;
+  padding: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+
+
+
+/* =========================================
+   PRINT STYLES (Thermal Printer / A4)
+   ========================================= */
+@media print {
+    /* 1. Hide everything by default */
+    body * {
+        visibility: hidden;
+    }
+
+    /* 2. Hide specific UI elements explicitly */
+    .navbar, 
+    .btn, 
+    .form-control, 
+    .form-select, 
+    .feature-card, 
+    .card-header,
+    .modal-header,
+    .modal-backdrop {
+        display: none !important;
+    }
+
+    /* 3. SHOW The Receipt (Dashboard) */
+    #finalReceipt, 
+    #finalReceipt * {
+        visibility: visible;
+    }
+    #finalReceipt {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        border: none !important;
+        box-shadow: none !important;
+    }
+
+    /* 4. SHOW The Master Table (Records Page) */
+    .table-responsive, 
+    .table-responsive * {
+        visibility: visible;
+    }
+    .table-responsive {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    /* Remove background colors to save ink */
+    body {
+        background-color: white !important;
+    }
+}
+
+
+/* ===============================
+   DASHBOARD STYLES
+================================ */
+
+/* Small dashboard-specific adjustments */
+        body {
+            background-color: var(--bg-page);
+            min-height: 100vh;
+        }
+        
+        .stat-card-active {
+            border-left: 5px solid var(--accent);
+        }
+
+        /* Table Styling */
+        .table-custom thead th {
+            background-color: var(--bg-light);
+            color: var(--primary-dark);
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary);
+            padding: 15px;
+        }
+        
+        .table-custom tbody td {
+            padding: 15px;
+            vertical-align: middle;
+        }
+
+        /* Floating Action Button for Mobile */
+        .fab-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            border-radius: 50%;
+            width: 60px;
+            height: 60px;
+            font-size: 24px;
+            box-shadow: 0 4px 15px rgba(15, 118, 110, 0.4);
+            z-index: 1000;
+        }

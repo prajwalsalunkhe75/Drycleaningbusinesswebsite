@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Master Register - Angel's Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body { background-color: var(--bg-page); min-height: 100vh; }
+        
+        /* Table Styling */
+        .table thead th { 
+            background-color: var(--bg-light); 
+            color: var(--primary-dark); 
+            border-bottom: 2px solid var(--primary); 
+        }
+
+        /* The "Bill" area styling */
+        .bill-preview {
+            background-color: #fff;
+            border: 2px dashed #cbd5e1;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+
+     <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+        <div class="collapse navbar-collapse" id="adminNav">
+    <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link active" href="dashboard.html">Overview</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="records.html"> Drycleaning </a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="customers.html">Monthly Billing</a></li>
+
+        <li class="nav-item"><a class="nav-link" href="worker.html">Worker Wages</a></li>
+
+           <li class="nav-item"><a class="nav-link" href="setting.html"> Setting  </a></li>
+        
+        <li class="nav-item ms-lg-3">
+            <a href="login.html" class="btn btn-outline-light btn-sm px-3 rounded-pill">Logout</a>
+        </li>
+    </ul>
+</div>
+    </nav>
+
+    <div class="container py-5">
+        
+        <div class="row g-4 mb-5 align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold" style="color: var(--text-dark);">Dry Cleaning Log</h2>
+                <p class="text-muted mb-0">The official "Owner's Copy" record book.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-outline-primary" onclick="window.print()">
+                        <i class="bi bi-printer me-2"></i>Print Sheet
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-lg-5">
+                <div class="card feature-card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold" style="color: var(--primary);">
+                            <i class="bi bi-pen me-2"></i>New Order Entry
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="masterForm">
+                            
+                            <div class="row g-2 mb-3">
+                                <div class="col-4">
+                                    <label class="small text-muted fw-bold">Ticket #</label>
+                                    <input type="text" class="form-control" id="ticketNo" placeholder="1001" required>
+                                </div>
+                                <div class="col-8">
+                                    <label class="small text-muted fw-bold">Customer Name</label>
+                                    <input type="text" class="form-control" id="custName" placeholder="Full Name" required>
+                                </div>
+                            </div>
+
+                            <hr class="text-muted opacity-25">
+
+                            <h6 class="small fw-bold text-primary mb-2">Add Cloth Details</h6>
+                            <div class="row g-2 mb-2">
+                                <div class="col-5">
+                                    <input type="text" class="form-control form-control-sm" id="clothType" placeholder="Item (e.g. Coat)">
+                                </div>
+                                <div class="col-3">
+                                    <input type="number" class="form-control form-control-sm" id="clothRate" placeholder="Rate ₹">
+                                </div>
+                                <div class="col-2">
+                                    <input type="number" class="form-control form-control-sm" id="clothQty" value="1">
+                                </div>
+                                <div class="col-2">
+                                    <button type="button" class="btn btn-sm btn-primary w-100" onclick="addItem()">
+                                        <i class="bi bi-plus-lg"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="bill-preview p-2 mb-3">
+                                <table class="table table-sm table-borderless small mb-0">
+                                    <thead>
+                                        <tr class="text-muted border-bottom">
+                                            <th>Item</th>
+                                            <th>Rate</th>
+                                            <th>Qty</th>
+                                            <th class="text-end">Amt</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="billItems">
+                                        <tr><td colspan="4" class="text-center text-muted fst-italic">No items added</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <div class="row mb-4 align-items-center">
+                                <div class="col-7">
+                                    <label class="small text-muted fw-bold">Extra / Add-on (₹)</label>
+                                    <input type="number" class="form-control" id="extraCharges" placeholder="0" oninput="calculateFinalTotal()">
+                                    <div class="form-text small">Starch, Urgent, Stain Removal</div>
+                                </div>
+                                <div class="col-5 text-end">
+                                    <small class="text-muted d-block">Final Amount</small>
+                                    <h3 class="fw-bold text-success mb-0">₹<span id="finalTotal">0</span></h3>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary shadow-sm py-2">
+                                    Save to Register <i class="bi bi-save ms-2"></i>
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-7">
+                <div class="card feature-card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0" style="color: var(--text-dark);">Log Book</h5>
+                        <input type="text" id="searchInput" class="form-control w-auto form-control-sm" placeholder="Search Ticket #">
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Date / Ticket</th>
+                                    <th>Customer</th>
+                                    <th>Summary</th>
+                                    <th>Total</th>
+                                    <th class="text-end pe-4">Extra</th>
+                                </tr>
+                            </thead>
+                            <tbody id="masterLogTable">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // STATE
+        let currentBillItems = [];
+        let masterRecords = [];
+
+        // 1. ADD ITEM TO CURRENT LIST
+        function addItem() {
+            const type = document.getElementById('clothType').value;
+            const rate = parseFloat(document.getElementById('clothRate').value);
+            const qty = parseInt(document.getElementById('clothQty').value);
+
+            if(!type || isNaN(rate) || isNaN(qty)) {
+                alert("Please fill Item, Rate and Qty");
+                return;
+            }
+
+            currentBillItems.push({ type, rate, qty, total: rate * qty });
+            
+            // Clear inputs
+            document.getElementById('clothType').value = "";
+            document.getElementById('clothRate').value = "";
+            document.getElementById('clothQty').value = "1";
+            document.getElementById('clothType').focus();
+
+            renderBillPreview();
+        }
+
+        // 2. RENDER MINI BILL PREVIEW
+        function renderBillPreview() {
+            const tbody = document.getElementById('billItems');
+            tbody.innerHTML = "";
+            
+            if(currentBillItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted fst-italic">No items added</td></tr>`;
+                calculateFinalTotal();
+                return;
+            }
+
+            currentBillItems.forEach((item, index) => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td>${item.type}</td>
+                        <td>${item.rate}</td>
+                        <td>${item.qty}</td>
+                        <td class="text-end fw-bold">₹${item.total}</td>
+                    </tr>
+                `;
+            });
+
+            calculateFinalTotal();
+        }
+
+        // 3. CALCULATE FINAL TOTAL
+        function calculateFinalTotal() {
+            const itemsTotal = currentBillItems.reduce((sum, item) => sum + item.total, 0);
+            const extra = parseFloat(document.getElementById('extraCharges').value) || 0;
+            document.getElementById('finalTotal').innerText = itemsTotal + extra;
+        }
+
+        // 4. SAVE TO MASTER REGISTER
+        document.getElementById('masterForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            if(currentBillItems.length === 0) {
+                alert("Please add at least one cloth item.");
+                return;
+            }
+
+            const ticket = document.getElementById('ticketNo').value;
+            const customer = document.getElementById('custName').value;
+            const extra = parseFloat(document.getElementById('extraCharges').value) || 0;
+            const finalAmt = parseFloat(document.getElementById('finalTotal').innerText);
+
+            // Create Summary String (e.g. "2 Suits, 1 Saree")
+            const summary = currentBillItems.map(i => `${i.qty} ${i.type}`).join(", ");
+
+            const record = {
+                id: Date.now(),
+                date: new Date().toLocaleDateString(),
+                ticket,
+                customer,
+                summary,
+                extra,
+                total: finalAmt
+            };
+
+            masterRecords.push(record);
+            renderMasterTable();
+
+            // Reset Form
+            document.getElementById('ticketNo').value = "";
+            document.getElementById('custName').value = "";
+            document.getElementById('extraCharges').value = "";
+            currentBillItems = [];
+            renderBillPreview();
+            alert("Record Saved Successfully!");
+        });
+
+        // 5. RENDER MASTER TABLE
+        function renderMasterTable() {
+            const tbody = document.getElementById('masterLogTable');
+            tbody.innerHTML = "";
+
+            // Show newest first
+            masterRecords.slice().reverse().forEach(rec => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4">
+                            <span class="fw-bold text-dark">#${rec.ticket}</span><br>
+                            <small class="text-muted">${rec.date}</small>
+                        </td>
+                        <td class="fw-bold text-primary">${rec.customer}</td>
+                        <td class="small text-muted" style="max-width: 150px; text-overflow: ellipsis; overflow: hidden;">${rec.summary}</td>
+                        <td class="text-success fw-bold fs-5">₹${rec.total}</td>
+                        <td class="text-end pe-4 text-muted small">
+                            ${rec.extra > 0 ? '+₹' + rec.extra : '-'}
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+        
+        // Search Function
+        document.getElementById('searchInput').addEventListener('keyup', (e) => {
+            const term = e.target.value.toLowerCase();
+            const rows = document.querySelectorAll('#masterLogTable tr');
+            
+            rows.forEach(row => {
+                const text = row.innerText.toLowerCase();
+                row.style.display = text.includes(term) ? '' : 'none';
+            });
+        });
+    </script>
+</body>
+</html>

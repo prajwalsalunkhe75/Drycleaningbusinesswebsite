@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Billing - Angel's Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Inherit Theme */
+        body { background-color: var(--bg-page); min-height: 100vh; }
+        
+        .table thead th { 
+            background-color: var(--bg-light); 
+            color: var(--primary-dark); 
+            border-bottom: 2px solid var(--primary); 
+            white-space: nowrap;
+        }
+
+        /* Balance Indicators */
+        .balance-positive { color: #dc2626; font-weight: bold; background-color: #fef2f2; padding: 2px 8px; border-radius: 4px; } 
+        .balance-neutral { color: #16a34a; font-weight: bold; } 
+
+        .search-box {
+            border-radius: 50px;
+            padding-left: 20px;
+            border: 1px solid #e2e8f0;
+        }
+    </style>
+</head>
+<body>
+
+       <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+        <div class="collapse navbar-collapse" id="adminNav">
+    <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link active" href="dashboard.html">Overview</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="records.html"> Drycleaning </a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="customers.html">Monthly Billing</a></li>
+
+        <li class="nav-item"><a class="nav-link" href="worker.html">Worker Wages</a></li>
+
+         <li class="nav-item"><a class="nav-link" href="setting.html"> Setting  </a></li>
+        
+        <li class="nav-item ms-lg-3">
+            <a href="login.html" class="btn btn-outline-light btn-sm px-3 rounded-pill">Logout</a>
+        </li>
+    </ul>
+</div>
+    </nav>
+
+    <div class="container py-5">
+        
+        <div class="row g-4 mb-5 align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold" style="color: var(--text-dark);">Monthly Customers</h2>
+                <p class="text-muted mb-0">Track credit balances and item details.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card border-0 shadow-sm p-3" style="border-left: 5px solid #e11d48;">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-0 small">Total Market Dues</p>
+                            <h2 class="fw-bold mb-0 text-danger">₹<span id="totalOutstanding">0</span></h2>
+                        </div>
+                        <div class="icon-circle mb-0" style="background-color: #ffe4e6; color: #e11d48;">
+                            <i class="bi bi-exclamation-circle"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-lg-4">
+                
+                <div class="card feature-card border-0 shadow-sm mb-4">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold" style="color: var(--primary);">
+                            <i class="bi bi-pen me-2"></i>Update Account
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="transactionForm">
+                            <div class="mb-3">
+                                <label class="small text-muted fw-bold">Select Customer</label>
+                                <select class="form-select form-control" id="transCustomer">
+                                    <option value="" selected disabled>Choose Name...</option>
+                                    </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="small text-muted fw-bold">Action</label>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="transType" id="typeCredit" value="credit" checked onchange="toggleDescField()">
+                                    <label class="btn btn-outline-danger" for="typeCredit">Add to Bill</label>
+
+                                    <input type="radio" class="btn-check" name="transType" id="typePayment" value="payment" onchange="toggleDescField()">
+                                    <label class="btn btn-outline-success" for="typePayment">Receive Payment</label>
+                                </div>
+                            </div>
+
+                            <div class="mb-3" id="descFieldWrapper">
+                                <label class="small text-muted fw-bold">Cloth Details (Manual Entry)</label>
+                                <textarea class="form-control" id="transDesc" rows="2" placeholder="e.g. 5 Shirts, 2 Sarees, 1 Blanket"></textarea>
+                                <div class="form-text small">Type the list of clothes given.</div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="small text-muted fw-bold">Amount (₹)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0">₹</span>
+                                    <input type="number" class="form-control border-start-0" id="transAmount" placeholder="0" required>
+                                </div>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary shadow-sm">
+                                    Update Ledger <i class="bi bi-check-lg ms-2"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="card feature-card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-person-plus-fill me-2"></i>New Registration</h6>
+                        <form id="newCustomerForm" class="d-flex gap-2">
+                            <input type="text" class="form-control" id="newCustName" placeholder="Name" required>
+                            <input type="text" class="form-control" id="newCustPhone" placeholder="Phone" style="width: 100px;">
+                            <button type="submit" class="btn btn-primary"><i class="bi bi-plus-lg"></i></button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card feature-card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0" style="color: var(--text-dark);">Active Accounts</h5>
+                        <input type="text" id="searchInput" class="form-control w-auto search-box small" placeholder="Search name...">
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Customer</th>
+                                    <th>Last Order Details</th>
+                                    <th>Pending Due</th>
+                                    <th class="text-end pe-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customerTable">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        // --- 1. DATA STATE ---
+        let customers = [
+            { id: 1, name: "Mrs. Sharma", phone: "9876543210", balance: 500, lastOrder: "5 Shirts, 2 Pants" },
+            { id: 2, name: "Mr. Rajesh Patil", phone: "9988776655", balance: 1200, lastOrder: "3 Sarees (Silk)" },
+            { id: 3, name: "Anjali Deshmukh", phone: "8877665544", balance: 0, lastOrder: "--" }
+        ];
+
+        // --- 2. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            renderTable();
+            updateDropdown();
+            updateTotalOutstanding();
+        });
+
+        // Toggle Description Field (Hide it when receiving payment)
+        function toggleDescField() {
+            const isCredit = document.getElementById('typeCredit').checked;
+            const descWrapper = document.getElementById('descFieldWrapper');
+            const descInput = document.getElementById('transDesc');
+            
+            if(isCredit) {
+                descWrapper.style.opacity = "1";
+                descInput.disabled = false;
+                descInput.placeholder = "e.g. 5 Shirts, 2 Sarees";
+            } else {
+                descWrapper.style.opacity = "0.5";
+                descInput.disabled = true;
+                descInput.value = "";
+                descInput.placeholder = "Payment Record";
+            }
+        }
+
+        // --- 3. ADD NEW CUSTOMER ---
+        document.getElementById('newCustomerForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const name = document.getElementById('newCustName').value;
+            const phone = document.getElementById('newCustPhone').value || "--";
+            const newId = customers.length > 0 ? customers[customers.length - 1].id + 1 : 1;
+            
+            customers.push({ id: newId, name: name, phone: phone, balance: 0, lastOrder: "New Account" });
+            
+            // Reset & Update
+            document.getElementById('newCustName').value = "";
+            document.getElementById('newCustPhone').value = "";
+            renderTable();
+            updateDropdown();
+            alert("Customer Registered Successfully!");
+        });
+
+        // --- 4. HANDLE TRANSACTION ---
+        document.getElementById('transactionForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const custId = parseInt(document.getElementById('transCustomer').value);
+            const amount = parseInt(document.getElementById('transAmount').value);
+            const type = document.querySelector('input[name="transType"]:checked').value;
+            const desc = document.getElementById('transDesc').value;
+
+            if (!custId || isNaN(amount)) {
+                alert("Please select a customer and enter amount.");
+                return;
+            }
+
+            // Find Customer
+            const customer = customers.find(c => c.id === custId);
+            
+            if (type === 'credit') {
+                customer.balance += amount; // Add to bill
+                // Update the "Last Order" note only if clothes were added
+                if(desc.trim() !== "") {
+                    customer.lastOrder = desc;
+                } else {
+                    customer.lastOrder = "Clothes Added (No details)";
+                }
+            } else {
+                customer.balance -= amount; // Reduce bill
+                if(customer.balance < 0) customer.balance = 0; 
+                customer.lastOrder = "Payment Received";
+            }
+
+            // Update UI
+            renderTable();
+            updateTotalOutstanding();
+            
+            // Cleanup
+            alert(`Updated ${customer.name}. New Due: ₹${customer.balance}`);
+            document.getElementById('transAmount').value = "";
+            document.getElementById('transDesc').value = "";
+        });
+
+        // --- 5. RENDER TABLE ---
+        function renderTable(filterText = "") {
+            const tbody = document.getElementById('customerTable');
+            tbody.innerHTML = "";
+            
+            const filtered = customers.filter(c => c.name.toLowerCase().includes(filterText.toLowerCase()));
+
+            filtered.forEach(c => {
+                const balanceClass = c.balance > 0 ? 'balance-positive' : 'balance-neutral';
+                const statusBadge = c.balance > 0 
+                    ? '<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill px-3">Pending</span>' 
+                    : '<span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3">Settled</span>';
+
+                // Format the Last Order text
+                let orderText = c.lastOrder;
+                if(c.balance === 0) orderText = '<span class="text-success fst-italic"><i class="bi bi-check-all me-1"></i>All Clear</span>';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4">
+                            <span class="fw-bold text-dark">${c.name}</span><br>
+                            <small class="text-muted">${c.phone}</small>
+                        </td>
+                        <td>
+                            <small class="text-dark bg-light px-2 py-1 rounded border">${orderText}</small>
+                        </td>
+                        <td>
+                            <span class="${balanceClass}">₹${c.balance}</span>
+                        </td>
+                        <td class="text-end pe-4">${statusBadge}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // --- 6. UPDATE DROPDOWN ---
+        function updateDropdown() {
+            const select = document.getElementById('transCustomer');
+            select.innerHTML = '<option value="" selected disabled>Choose Name...</option>';
+            
+            customers.forEach(c => {
+                select.innerHTML += `<option value="${c.id}">${c.name}</option>`;
+            });
+        }
+
+        // --- 7. CALCULATE TOTAL ---
+        function updateTotalOutstanding() {
+            const total = customers.reduce((sum, c) => sum + c.balance, 0);
+            document.getElementById('totalOutstanding').innerText = total;
+        }
+
+        // Search
+        document.getElementById('searchInput').addEventListener('keyup', (e) => {
+            renderTable(e.target.value);
+        });
+
+    </script>
+</body>
+</html>

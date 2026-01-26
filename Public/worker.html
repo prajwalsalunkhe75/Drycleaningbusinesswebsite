@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Staff Management - Angel's Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        /* Inherit theme variables */
+        body { background-color: var(--bg-page); min-height: 100vh; }
+        
+        /* Table Headers matching Dashboard */
+        .table thead th { 
+            background-color: var(--bg-light); 
+            color: var(--primary-dark); 
+            border-bottom: 2px solid var(--primary); 
+            white-space: nowrap;
+        }
+        
+        .wage-card-active { border-left: 5px solid var(--accent); }
+        
+        /* Highlight Editable Rate Inputs */
+        .rate-input {
+            background-color: #fffbeb; 
+            border: 1px solid #fcd34d;
+            color: #b45309;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+      <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm">
+        <div class="collapse navbar-collapse" id="adminNav">
+    <ul class="navbar-nav ms-auto align-items-center">
+        <li class="nav-item"><a class="nav-link active" href="dashboard.html">Overview</a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="records.html"> Drycleaning </a></li>
+        
+        <li class="nav-item"><a class="nav-link" href="customers.html">Monthly Billing</a></li>
+
+        <li class="nav-item"><a class="nav-link" href="worker.html">Worker Wages</a></li>
+        
+         <li class="nav-item"><a class="nav-link" href="setting.html"> Setting  </a></li>
+         
+        <li class="nav-item ms-lg-3">
+            <a href="login.html" class="btn btn-outline-light btn-sm px-3 rounded-pill">Logout</a>
+        </li>
+    </ul>
+</div>
+    </nav>
+    
+    <div class="container py-5">
+        
+        <div class="row g-4 mb-5 align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold" style="color: var(--text-dark);">Worker Management</h2>
+                <p class="text-muted mb-0">Track work done by staff for specific customers.</p>
+            </div>
+            <div class="col-md-4">
+                <div class="card feature-card wage-card-active border-0 shadow-sm p-3">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <p class="text-muted mb-0 small">Total Wages (Today)</p>
+                            <h2 class="fw-bold mb-0" style="color: var(--primary-dark);">₹<span id="totalDailyWages">0</span></h2>
+                        </div>
+                        <div class="icon-circle mb-0" style="background-color: #E6FFFA; color: var(--primary);">
+                            <i class="bi bi-cash-coin"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-lg-4">
+                <div class="card feature-card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 pt-4 px-4">
+                        <h5 class="fw-bold" style="color: var(--primary);">
+                            <i class="bi bi-pencil-square me-2"></i>Log Work
+                        </h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <form id="workerForm">
+                            
+                            <div class="mb-3">
+                                <label class="small text-muted fw-bold">1. Select Worker</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
+                                    <select class="form-select form-control border-start-0 ps-1" id="workerName">
+                                        <option value="Raju">Raju</option>
+                                        <option value="Sunita">Sunita</option>
+                                        <option value="Amit">Amit</option>
+                                        <option value="Priya">Priya</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label class="small text-muted fw-bold">2. Customer Name / Ticket #</label>
+                                <input type="text" class="form-control" id="customerRef" placeholder="e.g. Mrs. Sharma (1042)" required>
+                            </div>
+
+                            <div class="bg-light p-3 rounded-3 mb-3 border">
+                                <h6 class="small fw-bold text-primary mb-2 border-bottom pb-1">
+                                    Fixed Rate Items (₹7/pc)
+                                </h6>
+                                <div class="mb-1">
+                                    <label class="small text-muted" style="font-size: 0.75rem;">Total Qty (Shirt / Pant / Salwar)</label>
+                                    <input type="number" class="form-control bg-white" id="qtyFixed" placeholder="0">
+                                </div>
+                            </div>
+
+                            <div class="bg-light p-3 rounded-3 mb-2 border">
+                                <h6 class="small fw-bold text-primary mb-2 border-bottom pb-1">
+                                    Variable Rate Items
+                                </h6>
+                                
+                                <div class="row g-2 mb-2 align-items-end">
+                                    <div class="col-7">
+                                        <label class="small text-muted" style="font-size: 0.75rem;">Sarees (Qty)</label>
+                                        <input type="number" class="form-control bg-white" id="qtySaree" placeholder="0">
+                                    </div>
+                                    <div class="col-5">
+                                        <label class="small text-muted" style="font-size: 0.75rem;">Rate (₹)</label>
+                                        <input type="number" class="form-control rate-input" id="rateSaree" value="20">
+                                    </div>
+                                </div>
+
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-7">
+                                        <label class="small text-muted" style="font-size: 0.75rem;">Bedsheets (Qty)</label>
+                                        <input type="number" class="form-control bg-white" id="qtySheet" placeholder="0">
+                                    </div>
+                                    <div class="col-5">
+                                        <label class="small text-muted" style="font-size: 0.75rem;">Rate (₹)</label>
+                                        <input type="number" class="form-control rate-input" id="rateSheet" value="30">
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid mt-4">
+                                <button type="submit" class="btn btn-primary shadow-sm">
+                                    Calculate & Add to List <i class="bi bi-arrow-right ms-2"></i>
+                                </button>
+                            </div>
+
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="card feature-card border-0 shadow-sm overflow-hidden h-100">
+                    <div class="card-header bg-white border-0 py-3 px-4">
+                        <h5 class="fw-bold mb-0" style="color: var(--text-dark);">Today's Work Log</h5>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead>
+                                <tr>
+                                    <th class="ps-4">Worker</th>
+                                    <th>Customer Ref</th>
+                                    <th>Work Details</th>
+                                    <th>Wage</th>
+                                    <th class="text-end pe-4">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="workerLogTable">
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-5">
+                                        <i class="bi bi-clipboard-data display-4 d-block mb-2 opacity-25"></i>
+                                        No logs added today.
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="card-footer bg-light p-3 border-0">
+                        <small class="text-muted fw-bold d-block mb-2">Total Payable by Worker:</small>
+                        <div id="workerSummary" class="d-flex flex-wrap gap-2 small"></div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // --- CONFIGURATION ---
+        const FIXED_RATE = 7; 
+
+        let dailyLogs = [];
+
+        document.getElementById('workerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            // 1. Get Values
+            const workerName = document.getElementById('workerName').value;
+            const customerName = document.getElementById('customerRef').value; // New Field
+
+            // Quantities
+            const qFixed = parseInt(document.getElementById('qtyFixed').value) || 0;
+            const qSaree = parseInt(document.getElementById('qtySaree').value) || 0;
+            const rSaree = parseInt(document.getElementById('rateSaree').value) || 0; 
+            const qSheet = parseInt(document.getElementById('qtySheet').value) || 0;
+            const rSheet = parseInt(document.getElementById('rateSheet').value) || 0; 
+
+            // Validation
+            if(qFixed + qSaree + qSheet === 0) {
+                alert("Please enter quantities.");
+                return;
+            }
+
+            // 2. Calculation Logic
+            const fixedPay = qFixed * FIXED_RATE;
+            const variablePay = (qSaree * rSaree) + (qSheet * rSheet);
+            const totalWage = fixedPay + variablePay;
+
+            // 3. Add to Log
+            const logEntry = {
+                id: Date.now(),
+                worker: workerName,
+                customer: customerName,
+                desc: formatDesc(qFixed, qSaree, qSheet),
+                amount: totalWage
+            };
+            dailyLogs.push(logEntry);
+
+            // 4. Update Interface
+            renderTable();
+            updateTotals();
+            
+            // 5. Clear Inputs (Keep Worker Name)
+            document.getElementById('customerRef').value = '';
+            document.getElementById('qtyFixed').value = '';
+            document.getElementById('qtySaree').value = '';
+            document.getElementById('qtySheet').value = '';
+        });
+
+        function formatDesc(fix, sa, sh) {
+            let parts = [];
+            if(fix) parts.push(`${fix} Regular`);
+            if(sa) parts.push(`${sa} Sarees`);
+            if(sh) parts.push(`${sh} Sheets`);
+            return parts.join(", ");
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('workerLogTable');
+            tbody.innerHTML = '';
+            
+            if (dailyLogs.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-clipboard-data display-4 d-block mb-2 opacity-25"></i>No logs added today.</td></tr>`;
+                return;
+            }
+
+            // Show newest first
+            dailyLogs.slice().reverse().forEach(log => {
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4 fw-bold text-dark">${log.worker}</td>
+                        <td class="text-primary fw-bold small">${log.customer}</td>
+                        <td class="small text-muted">${log.desc}</td>
+                        <td class="text-success fw-bold">₹${log.amount}</td>
+                        <td class="text-end pe-4">
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteLog(${log.id})">
+                                <i class="bi bi-trash-fill"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        function updateTotals() {
+            const total = dailyLogs.reduce((sum, log) => sum + log.amount, 0);
+            document.getElementById('totalDailyWages').innerText = total;
+
+            const workerTotals = {};
+            dailyLogs.forEach(log => {
+                if(!workerTotals[log.worker]) workerTotals[log.worker] = 0;
+                workerTotals[log.worker] += log.amount;
+            });
+
+            const summaryDiv = document.getElementById('workerSummary');
+            summaryDiv.innerHTML = '';
+            for (const [worker, amount] of Object.entries(workerTotals)) {
+                summaryDiv.innerHTML += `
+                    <div class="badge bg-white text-dark border shadow-sm p-2 fw-normal">
+                        ${worker}: <span class="fw-bold text-primary">₹${amount}</span>
+                    </div>
+                `;
+            }
+        }
+
+        function deleteLog(id) {
+            dailyLogs = dailyLogs.filter(log => log.id !== id);
+            renderTable();
+            updateTotals();
+        }
+    </script>
+</body>
+</html>
