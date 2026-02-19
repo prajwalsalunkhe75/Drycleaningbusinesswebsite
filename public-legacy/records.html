@@ -177,12 +177,68 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-    <script>
-        // STATE
+  <script>
+        // ==========================================
+        // 1. STATE & CONFIGURATION
+        // ==========================================
         let currentBillItems = [];
         let masterRecords = [];
 
-        // 1. ADD ITEM TO CURRENT LIST
+        // Load data immediately when page opens
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchRecords();
+        });
+
+        // ==========================================
+        // 2. SERVER COMMUNICATION
+        // ==========================================
+        
+        // A. FETCH DATA
+        async function fetchRecords() {
+            try {
+                const response = await fetch('/api/orders');
+                const data = await response.json();
+                masterRecords = data;
+                renderMasterTable();
+            } catch (error) {
+                console.error("Error loading records:", error);
+            }
+        }
+
+        // B. SAVE DATA (The Fix!)
+        async function saveToDatabase(newOrder) {
+            try {
+                const response = await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newOrder)
+                });
+
+                if (response.ok) {
+                    alert("✅ Record Saved to Database!");
+                    
+                    // Clear the Form
+                    document.getElementById('ticketNo').value = "";
+                    document.getElementById('custName').value = "";
+                    document.getElementById('extraCharges').value = "";
+                    document.getElementById('finalTotal').innerText = "0";
+                    currentBillItems = [];
+                    renderBillPreview();
+
+                    // Refresh the Table
+                    fetchRecords();
+                } else {
+                    alert("❌ Failed to save. Check Server console.");
+                }
+            } catch (error) {
+                console.error("Error saving:", error);
+                alert("❌ Server Error. Is the backend running?");
+            }
+        }
+
+        // ==========================================
+        // 3. FORM LOGIC (Adding Items)
+        // ==========================================
         function addItem() {
             const type = document.getElementById('clothType').value;
             const rate = parseFloat(document.getElementById('clothRate').value);
@@ -195,7 +251,7 @@
 
             currentBillItems.push({ type, rate, qty, total: rate * qty });
             
-            // Clear inputs
+            // Reset Inputs
             document.getElementById('clothType').value = "";
             document.getElementById('clothRate').value = "";
             document.getElementById('clothQty').value = "1";
@@ -204,7 +260,6 @@
             renderBillPreview();
         }
 
-        // 2. RENDER MINI BILL PREVIEW
         function renderBillPreview() {
             const tbody = document.getElementById('billItems');
             tbody.innerHTML = "";
@@ -215,7 +270,7 @@
                 return;
             }
 
-            currentBillItems.forEach((item, index) => {
+            currentBillItems.forEach(item => {
                 tbody.innerHTML += `
                     <tr>
                         <td>${item.type}</td>
@@ -225,20 +280,20 @@
                     </tr>
                 `;
             });
-
             calculateFinalTotal();
         }
 
-        // 3. CALCULATE FINAL TOTAL
         function calculateFinalTotal() {
             const itemsTotal = currentBillItems.reduce((sum, item) => sum + item.total, 0);
             const extra = parseFloat(document.getElementById('extraCharges').value) || 0;
             document.getElementById('finalTotal').innerText = itemsTotal + extra;
         }
 
-        // 4. SAVE TO MASTER REGISTER
+        // ==========================================
+        // 4. SUBMIT LISTENER
+        // ==========================================
         document.getElementById('masterForm').addEventListener('submit', function(e) {
-            e.preventDefault();
+            e.preventDefault(); // Stop page reload
 
             if(currentBillItems.length === 0) {
                 alert("Please add at least one cloth item.");
@@ -247,52 +302,68 @@
 
             const ticket = document.getElementById('ticketNo').value;
             const customer = document.getElementById('custName').value;
-            const extra = parseFloat(document.getElementById('extraCharges').value) || 0;
             const finalAmt = parseFloat(document.getElementById('finalTotal').innerText);
 
-            // Create Summary String (e.g. "2 Suits, 1 Saree")
-            const summary = currentBillItems.map(i => `${i.qty} ${i.type}`).join(", ");
+            // Format Items for Database
+            const formattedItems = currentBillItems.map(i => ({
+                type: i.type,
+                qty: i.qty,
+                price: i.total
+            }));
 
-            const record = {
-                id: Date.now(),
-                date: new Date().toLocaleDateString(),
-                ticket,
-                customer,
-                summary,
-                extra,
-                total: finalAmt
+            // CREATE THE ORDER OBJECT
+            const newOrder = {
+                id: ticket,
+                customerName: customer,
+                items: formattedItems,
+                totalAmount: finalAmt,
+                status: "Pending",
+                paymentStatus: "Unpaid",
+                
+                // IMPORTANT: This tag keeps it Separate!
+                origin: 'records' 
             };
 
-            masterRecords.push(record);
-            renderMasterTable();
-
-            // Reset Form
-            document.getElementById('ticketNo').value = "";
-            document.getElementById('custName').value = "";
-            document.getElementById('extraCharges').value = "";
-            currentBillItems = [];
-            renderBillPreview();
-            alert("Record Saved Successfully!");
+            // Send to Server
+            saveToDatabase(newOrder);
         });
 
-        // 5. RENDER MASTER TABLE
+        // ==========================================
+        // 5. MASTER TABLE RENDER (Filtered)
+        // ==========================================
         function renderMasterTable() {
             const tbody = document.getElementById('masterLogTable');
             tbody.innerHTML = "";
 
+            // FILTER: Only show items created in this Log Book
+            const logBookData = masterRecords.filter(order => order.origin === 'records');
+
+            if (logBookData.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">No Log Book entries found.</td></tr>`;
+                return;
+            }
+
             // Show newest first
-            masterRecords.slice().reverse().forEach(rec => {
+            logBookData.slice().reverse().forEach(rec => {
+                const dateObj = new Date(rec.date);
+                const dateStr = dateObj.toLocaleDateString();
+
+                // Create a summary string
+                const summary = rec.items ? rec.items.map(i => `${i.qty} ${i.type}`).join(", ") : "No Details";
+
                 tbody.innerHTML += `
                     <tr>
                         <td class="ps-4">
-                            <span class="fw-bold text-dark">#${rec.ticket}</span><br>
-                            <small class="text-muted">${rec.date}</small>
+                            <span class="fw-bold text-dark">#${rec.id}</span><br>
+                            <small class="text-muted">${dateStr}</small>
                         </td>
-                        <td class="fw-bold text-primary">${rec.customer}</td>
-                        <td class="small text-muted" style="max-width: 150px; text-overflow: ellipsis; overflow: hidden;">${rec.summary}</td>
-                        <td class="text-success fw-bold fs-5">₹${rec.total}</td>
+                        <td class="fw-bold text-primary">${rec.customerName}</td>
+                        <td class="small text-muted" style="max-width: 150px; text-overflow: ellipsis; overflow: hidden;">
+                            ${summary}
+                        </td>
+                        <td class="text-success fw-bold fs-5">₹${rec.totalAmount}</td>
                         <td class="text-end pe-4 text-muted small">
-                            ${rec.extra > 0 ? '+₹' + rec.extra : '-'}
+                            ${rec.paymentStatus === 'Paid' ? '<span class="badge bg-success">Paid</span>' : '<span class="badge bg-danger">Unpaid</span>'}
                         </td>
                     </tr>
                 `;
@@ -303,7 +374,6 @@
         document.getElementById('searchInput').addEventListener('keyup', (e) => {
             const term = e.target.value.toLowerCase();
             const rows = document.querySelectorAll('#masterLogTable tr');
-            
             rows.forEach(row => {
                 const text = row.innerText.toLowerCase();
                 row.style.display = text.includes(term) ? '' : 'none';

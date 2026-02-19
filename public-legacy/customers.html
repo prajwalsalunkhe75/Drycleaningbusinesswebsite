@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monthly Billing - Angel's Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body style="background-color: var(--bg-page);">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm" style="background-color: var(--primary);">
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">Overview</a></li>
+                <li class="nav-item"><a class="nav-link" href="records.html">Drycleaning</a></li>
+                <li class="nav-item"><a class="nav-link active" href="customers.html">Monthly Billing</a></li>
+                <li class="nav-item"><a class="nav-link" href="worker.html">Worker Wages</a></li>
+                <li class="nav-item"><a class="nav-link" href="setting.html">Setting</a></li>
+                <li class="nav-item ms-lg-3"><a href="login.html" class="btn btn-outline-light btn-sm px-3 rounded-pill">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container-fluid px-4 py-4">
+        <div class="row g-4 h-100">
+            
+            <div class="col-md-4">
+                <div class="card border-0 shadow-sm h-100">
+                    <div class="card-header bg-white border-0 py-3">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="fw-bold mb-0 text-primary">Subscribers</h5>
+                            <button class="btn btn-sm btn-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#newCustomerModal">
+                                <i class="bi bi-person-plus-fill"></i> New
+                            </button>
+                        </div>
+                        <input type="text" id="searchInput" class="form-control form-control-sm" placeholder="Search customer..." onkeyup="filterCustomers()">
+                    </div>
+                    <div class="card-body p-0 overflow-auto" style="max-height: 70vh;">
+                        <div class="list-group list-group-flush" id="customerList">
+                            </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm h-100" id="detailCard" style="display:none;">
+                    
+                    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="fw-bold mb-0 text-dark" id="viewName">Select Customer</h4>
+                            <small class="text-muted" id="viewPhone">+91 ...</small>
+                        </div>
+                        <div class="text-end">
+                            <small class="text-muted d-block">TOTAL DUE</small>
+                            <h2 class="fw-bold text-danger mb-0">₹<span id="viewDue">0</span></h2>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-light border-bottom d-flex gap-2">
+                        <button class="btn btn-success flex-grow-1" data-bs-toggle="modal" data-bs-target="#addEntryModal" onclick="prepareEntryModal()">
+                            <i class="bi bi-plus-circle me-2"></i>Add Clothes (Entry)
+                        </button>
+                        <button class="btn btn-outline-primary" onclick="recordPayment()">
+                            <i class="bi bi-cash-stack me-2"></i>Receive Payment
+                        </button>
+                        <button class="btn btn-outline-danger" onclick="deleteCurrentCustomer()" title="Delete Customer">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+
+                    <div class="card-body p-0 overflow-auto">
+                        <table class="table table-hover mb-0">
+                            <thead class="bg-light sticky-top">
+                                <tr>
+                                    <th class="ps-4">Date</th>
+                                    <th>Description (Items)</th>
+                                    <th>Type</th>
+                                    <th class="text-end pe-4">Amount</th>
+                                </tr>
+                            </thead>
+                            <tbody id="ledgerTable">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="card border-0 shadow-sm h-100 d-flex align-items-center justify-content-center text-muted" id="emptyState">
+                    <div class="text-center">
+                        <i class="bi bi-journal-text display-1"></i>
+                        <p class="mt-3">Select a customer to view their monthly log.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="newCustomerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Subscriber</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="newCustName" class="form-control mb-2" placeholder="Full Name">
+                    <input type="text" id="newCustPhone" class="form-control mb-2" placeholder="Phone Number">
+                    <input type="text" id="newCustAddr" class="form-control" placeholder="Address / Flat No">
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-primary w-100" onclick="createNewCustomer()">Save Customer</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="addEntryModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title">Add Daily Entry</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="btn-group w-100" role="group">
+                            <input type="radio" class="btn-check" name="entryType" id="optIron" autocomplete="off" checked onclick="toggleEntryForm()">
+                            <label class="btn btn-outline-primary" for="optIron">Ironing</label>
+
+                            <input type="radio" class="btn-check" name="entryType" id="optDry" autocomplete="off" onclick="toggleEntryForm()">
+                            <label class="btn btn-outline-danger" for="optDry">Dry Cleaning</label>
+                        </div>
+                    </div>
+
+                    <div id="ironForm">
+                        <select class="form-select mb-2" id="ironItem" onchange="checkOtherOption(this)">
+                            <option value="Shirt">Shirt</option>
+                            <option value="Pant">Pant</option>
+                            <option value="Salwar">Salwar</option>
+                            <option value="Kamiz">Kamiz</option>
+                            <option value="Blazer">Blazer</option>
+                            <option value="Other">Other (Specify)</option>
+                        </select>
+                        
+                        <div id="otherInputDiv" class="row g-2 mb-2" style="display:none;">
+                            <div class="col-8">
+                                <input type="text" id="otherName" class="form-control" placeholder="Item Name">
+                            </div>
+                            <div class="col-4">
+                                <input type="number" id="otherRate" class="form-control" placeholder="Rate ₹">
+                            </div>
+                        </div>
+
+                        <input type="number" id="ironQty" class="form-control mb-2" placeholder="Quantity" value="1">
+                        <input type="number" id="ironRate" class="form-control mb-3" placeholder="Rate per piece (₹)" value="10">
+                    </div>
+
+                    <div id="dcForm" style="display:none;">
+                        <input type="text" id="dcItemName" class="form-control mb-2" placeholder="Item Name (e.g. Suit)">
+                        
+                        <div class="row g-2 mb-2">
+                            <div class="col-6">
+                                <input type="number" id="dcRate" class="form-control" placeholder="Rate (₹)">
+                            </div>
+                            <div class="col-6">
+                                <input type="number" id="dcItemQty" class="form-control" placeholder="Qty" value="1">
+                            </div>
+                        </div>
+                        
+                        <input type="number" id="dcStain" class="form-control mb-3" placeholder="Extra Stain Charge (₹)">
+                    </div>
+
+                    <button class="btn btn-success w-100 fw-bold" onclick="saveEntry()">Add to Ledger</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        let customers = [];
+        let selectedCustID = null;
+
+        // 1. INITIALIZATION
+        document.addEventListener('DOMContentLoaded', () => {
+            fetchCustomers();
+        });
+
+        // 2. FETCH & RENDER LIST
+        async function fetchCustomers() {
+            try {
+                const res = await fetch('/api/customers');
+                customers = await res.json();
+                renderList();
+                if(selectedCustID) selectCustomer(selectedCustID);
+            } catch (e) { console.error(e); }
+        }
+
+        function renderList(data = customers) {
+            const list = document.getElementById('customerList');
+            list.innerHTML = "";
+            data.forEach(c => {
+                const activeClass = (c.id === selectedCustID) ? 'active' : '';
+                list.innerHTML += `
+                    <a href="#" class="list-group-item list-group-item-action ${activeClass}" onclick="selectCustomer(${c.id})">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 fw-bold">${c.name}</h6>
+                            <small class="${c.totalDue > 0 ? 'text-danger' : 'text-success'} fw-bold">₹${c.totalDue}</small>
+                        </div>
+                        <small class="text-muted">${c.phone}</small>
+                    </a>
+                `;
+            });
+        }
+
+        // 3. SELECT CUSTOMER
+        function selectCustomer(id) {
+            selectedCustID = id;
+            const cust = customers.find(c => c.id === id);
+            if(!cust) return;
+
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('detailCard').style.display = 'block';
+            
+            document.getElementById('viewName').innerText = cust.name;
+            document.getElementById('viewPhone').innerText = cust.phone;
+            document.getElementById('viewDue').innerText = cust.totalDue;
+
+            renderList(); // Refresh highlight
+
+            const tbody = document.getElementById('ledgerTable');
+            tbody.innerHTML = "";
+            
+            if(!cust.transactions || cust.transactions.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No entries this month.</td></tr>`;
+                return;
+            }
+
+            cust.transactions.slice().reverse().forEach(t => {
+                const dateStr = new Date(t.date).toLocaleDateString();
+                const badge = t.type === 'Payment' ? 'bg-success' : (t.type === 'Ironing' ? 'bg-primary' : 'bg-danger');
+                const amtDisplay = t.type === 'Payment' ? `-₹${t.amount}` : `₹${t.amount}`;
+                const textClass = t.type === 'Payment' ? 'text-success fw-bold' : 'text-dark';
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4 text-muted small">${dateStr}</td>
+                        <td>${t.summary}</td>
+                        <td><span class="badge ${badge} rounded-pill small">${t.type}</span></td>
+                        <td class="text-end pe-4 ${textClass}">${amtDisplay}</td>
+                    </tr>
+                `;
+            });
+        }
+
+        // 4. ADD ENTRY (With Stain Logic)
+        function toggleEntryForm() {
+            const isIron = document.getElementById('optIron').checked;
+            document.getElementById('ironForm').style.display = isIron ? 'block' : 'none';
+            document.getElementById('dcForm').style.display = isIron ? 'none' : 'block';
+        }
+
+        function checkOtherOption(selectEl) {
+            const otherDiv = document.getElementById('otherInputDiv');
+            otherDiv.style.display = (selectEl.value === 'Other') ? 'flex' : 'none';
+        }
+
+        // Prep modal (reset inputs)
+        function prepareEntryModal() {
+            document.getElementById('ironItem').value = "Shirt";
+            document.getElementById('ironQty').value = "1";
+            
+            document.getElementById('dcItemName').value = "";
+            document.getElementById('dcRate').value = "";
+            document.getElementById('dcItemQty').value = "1";
+            document.getElementById('dcStain').value = ""; // Clear Stain
+        }
+
+        async function saveEntry() {
+            if(!selectedCustID) return;
+            const isIron = document.getElementById('optIron').checked;
+            let summary = "";
+            let amount = 0;
+            let type = "";
+
+            if(isIron) {
+                type = "Ironing";
+                const selectVal = document.getElementById('ironItem').value;
+                const qty = parseInt(document.getElementById('ironQty').value) || 0;
+                let rate = parseFloat(document.getElementById('ironRate').value) || 0;
+                let itemName = selectVal;
+
+                if(selectVal === 'Other') {
+                    itemName = document.getElementById('otherName').value;
+                    rate = parseFloat(document.getElementById('otherRate').value) || 0;
+                }
+                amount = qty * rate;
+                summary = `${qty} x ${itemName} (Iron)`;
+            } else {
+                type = "DryClean";
+                const item = document.getElementById('dcItemName').value;
+                const rate = parseFloat(document.getElementById('dcRate').value) || 0;
+                const qty = parseInt(document.getElementById('dcItemQty').value) || 0;
+                const stain = parseFloat(document.getElementById('dcStain').value) || 0;
+
+                // MATH: (Rate * Qty) + Stain
+                amount = (rate * qty) + stain;
+                
+                // Summary string includes stain info if added
+                summary = `${qty} x ${item} (DryClean)`;
+                if(stain > 0) summary += ` + ₹${stain} Stain`;
+            }
+
+            try {
+                const cust = customers.find(c => c.id === selectedCustID);
+                const newTrans = {
+                    date: new Date(),
+                    summary: summary,
+                    amount: amount,
+                    type: type
+                };
+                
+                const newTotalDue = cust.totalDue + amount;
+                const updatedTransactions = [...cust.transactions, newTrans];
+
+                await fetch(`/api/customers/${selectedCustID}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        totalDue: newTotalDue,
+                        transactions: updatedTransactions 
+                    })
+                });
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addEntryModal'));
+                modal.hide();
+                fetchCustomers();
+            } catch (e) { console.error(e); }
+        }
+
+       // 5. RECEIVE PAYMENT (Linked to Dashboard Revenue)
+        async function recordPayment() {
+            // 1. Get Amount
+            const amount = parseFloat(prompt("Enter Amount Received:"));
+            if(!amount || isNaN(amount)) return;
+
+            const cust = customers.find(c => c.id === selectedCustID);
+            if(!cust) return;
+
+            // 2. Prepare Ledger Entry
+            const newTrans = {
+                date: new Date(),
+                summary: "Cash Payment Received",
+                amount: amount,
+                type: "Payment" // This marks it as green in the table
+            };
+
+            // 3. Update Customer Data (Reduce Debt)
+            const newTotalDue = cust.totalDue - amount;
+            const updatedTransactions = [...cust.transactions, newTrans];
+
+            try {
+                // STEP A: Update Customer Ledger
+                await fetch(`/api/customers/${selectedCustID}`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ 
+                        totalDue: newTotalDue,
+                        transactions: updatedTransactions 
+                    })
+                });
+
+                // STEP B: Create a "Ghost Order" for Dashboard Revenue
+                // This makes the money show up in the Dashboard's Revenue Card!
+                const revenueRecord = {
+                    id: Date.now(), // Unique ID
+                    customerName: cust.name + " (Monthly Bill)", // Clear label
+                    phone: cust.phone,
+                    items: [{ type: "Bill Payment", qty: 1, price: amount }],
+                    totalAmount: amount,
+                    paymentStatus: "Paid",   // <--- CRITICAL: Counts as Revenue
+                    status: "Delivered",     // <--- CRITICAL: Doesn't show as Pending
+                    origin: "ledger",        // Tag to know it came from here
+                    date: new Date()
+                };
+
+                await fetch('/api/orders', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(revenueRecord)
+                });
+
+                // 4. Success & Refresh
+                alert("Payment Recorded & Added to Today's Revenue!");
+                fetchCustomers(); // Refresh the Ledger View
+
+            } catch (e) { 
+                console.error("Payment Error:", e);
+                alert("Error recording payment"); 
+            }
+        }
+
+        // 6. CREATE CUSTOMER
+        async function createNewCustomer() {
+            const name = document.getElementById('newCustName').value;
+            const phone = document.getElementById('newCustPhone').value;
+            const addr = document.getElementById('newCustAddr').value;
+
+            if(!name || !phone) { alert("Name & Phone Required"); return; }
+
+            const newC = {
+                id: Date.now(),
+                name, phone, address: addr,
+                totalDue: 0,
+                transactions: []
+            };
+
+            try {
+                const res = await fetch('/api/customers', {
+                    method: 'POST',
+                    headers: {'Content-Type':'application/json'},
+                    body: JSON.stringify(newC)
+                });
+                
+                if(res.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('newCustomerModal'));
+                    modal.hide();
+                    document.getElementById('newCustName').value = "";
+                    document.getElementById('newCustPhone').value = "";
+                    fetchCustomers();
+                } else {
+                    alert("Error saving customer. Check Server console.");
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // 7. DELETE CUSTOMER (New Feature)
+        async function deleteCurrentCustomer() {
+            if(!selectedCustID) return;
+            if(!confirm("⚠️ Are you sure you want to delete this customer? \nThis action cannot be undone.")) return;
+
+            try {
+                const res = await fetch(`/api/customers/${selectedCustID}`, {
+                    method: 'DELETE'
+                });
+
+                if(res.ok) {
+                    alert("Customer Deleted Successfully");
+                    selectedCustID = null;
+                    document.getElementById('detailCard').style.display = 'none';
+                    document.getElementById('emptyState').style.display = 'flex';
+                    fetchCustomers();
+                } else {
+                    alert("Error deleting customer");
+                }
+            } catch(e) { console.error(e); }
+        }
+
+        // Filter
+        function filterCustomers() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = customers.filter(c => c.name.toLowerCase().includes(q));
+            renderList(filtered);
+        }
+    </script>
+</body>
+</html>

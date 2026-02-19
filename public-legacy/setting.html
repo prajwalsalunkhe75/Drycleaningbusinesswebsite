@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings - Angel's Admin</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+
+    <style>
+        body { background-color: var(--bg-page); min-height: 100vh; }
+        .settings-section-title {
+            color: var(--primary); font-weight: bold;
+            border-bottom: 2px solid var(--bg-light);
+            padding-bottom: 10px; margin-bottom: 20px;
+        }
+        .form-label { font-size: 0.85rem; color: #64748b; font-weight: 600; }
+        .input-group-text { background-color: var(--bg-light); color: var(--primary); border: 1px solid #ced4da; border-right: none; }
+        .form-control { border-left: none; }
+        .form-control:focus { border-color: #ced4da; box-shadow: none; border-left: 1px solid var(--primary); }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm" style="background-color: var(--primary);">
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link" href="dashboard.html">Overview</a></li>
+                <li class="nav-item"><a class="nav-link" href="records.html">Drycleaning</a></li>
+                <li class="nav-item"><a class="nav-link" href="customers.html">Monthly Billing</a></li>
+                <li class="nav-item"><a class="nav-link" href="worker.html">Worker Wages</a></li>
+                <li class="nav-item"><a class="nav-link active" href="setting.html">Setting</a></li>
+                <li class="nav-item ms-lg-3"><a href="login.html" class="btn btn-outline-light btn-sm px-3 rounded-pill">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <div class="container py-5">
+        
+        <div class="row mb-5 align-items-center">
+            <div class="col-md-8">
+                <h2 class="fw-bold" style="color: var(--text-dark);">Settings & Rates</h2>
+                <p class="text-muted mb-0">Manage prices using the dropdown menus below.</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <button class="btn btn-primary px-4 shadow-sm" onclick="saveAllSettings()">
+                    <i class="bi bi-save2-fill me-2"></i>Save Changes
+                </button>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            
+            <div class="col-lg-6">
+                <div class="card feature-card border-0 shadow-sm h-100">
+                    <div class="card-body p-4">
+                        <h5 class="settings-section-title">
+                            <i class="bi bi-tag-fill me-2"></i>Customer Price List
+                        </h5>
+                        
+                        <div class="bg-light p-3 rounded mb-4">
+                            <h6 class="fw-bold text-dark mb-3">Standard Rates (Walk-in)</h6>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-7">
+                                    <label class="form-label">Select Item</label>
+                                    <select class="form-select" id="stdItemSelect" onchange="loadPrice('std')">
+                                        </select>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="stdItemPrice" oninput="updateTempState('std')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-light p-3 rounded" style="background-color: #eef2ff !important;">
+                            <h6 class="fw-bold text-primary mb-3">Home Delivery Rates (+Charge)</h6>
+                            <div class="row g-2 align-items-end">
+                                <div class="col-7">
+                                    <label class="form-label">Select Item</label>
+                                    <select class="form-select" id="homeItemSelect" onchange="loadPrice('home')">
+                                        </select>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label">Price</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="homeItemPrice" oninput="updateTempState('home')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                
+                <div class="card feature-card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <h5 class="settings-section-title">
+                            <i class="bi bi-people-fill me-2"></i>Worker Wages (Payout)
+                        </h5>
+                        <p class="small text-muted mb-3">Set the amount paid to worker per piece.</p>
+
+                        <div class="bg-light p-3 rounded border">
+                            <div class="row g-2 align-items-end">
+                                <div class="col-7">
+                                    <label class="form-label">Select Item</label>
+                                    <select class="form-select" id="wageItemSelect" onchange="loadPrice('wage')">
+                                        </select>
+                                </div>
+                                <div class="col-5">
+                                    <label class="form-label">Wage</label>
+                                    <div class="input-group">
+                                        <span class="input-group-text">₹</span>
+                                        <input type="number" class="form-control" id="wageItemPrice" oninput="updateTempState('wage')">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="alert alert-warning small py-2 d-flex align-items-center border-0">
+                                <i class="bi bi-info-circle-fill me-2"></i>
+                                Select an item above to edit its specific wage.
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card feature-card border-0 shadow-sm">
+                    <div class="card-body p-4">
+                        <h5 class="settings-section-title"><i class="bi bi-shop me-2"></i>Shop Profile</h5>
+                        <div class="mb-2"><label class="form-label">Shop Name</label><input type="text" class="form-control" value="Angel's Dry Cleaners"></div>
+                        <div class="mb-2"><label class="form-label">Address</label><textarea class="form-control" rows="1">Shop No. 4, MG Road, Pune</textarea></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // --- 1. DEFAULT DATA (If nothing saved yet) ---
+        const defaultSettings = {
+            regular: { shirt: 8, pant: 8, saree: 120, blazer: 120, bedsheet: 30 },
+            home: { shirt: 15, pant: 15, saree: 150, blazer: 150, bedsheet: 40 },
+            wages: { shirt: 3.5, pant: 3.5, saree: 10, blazer: 20, bedsheet: 5 }
+        };
+
+        // Current State Variable
+        let currentSettings = JSON.parse(JSON.stringify(defaultSettings));
+
+        // --- 2. INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check LocalStorage
+            const saved = localStorage.getItem('laundryPrices');
+            if(saved) {
+                currentSettings = JSON.parse(saved);
+            }
+
+            // Populate Dropdowns
+            populateDropdown('stdItemSelect', currentSettings.regular);
+            populateDropdown('homeItemSelect', currentSettings.home);
+            populateDropdown('wageItemSelect', currentSettings.wages);
+
+            // Load Initial Prices (Select first item)
+            loadPrice('std');
+            loadPrice('home');
+            loadPrice('wage');
+        });
+
+        // --- 3. HELPER FUNCTIONS ---
+        
+        function populateDropdown(elementId, dataObj) {
+            const select = document.getElementById(elementId);
+            select.innerHTML = "";
+            Object.keys(dataObj).forEach(key => {
+                // Capitalize first letter (shirt -> Shirt)
+                const label = key.charAt(0).toUpperCase() + key.slice(1);
+                select.innerHTML += `<option value="${key}">${label}</option>`;
+            });
+        }
+
+        function loadPrice(type) {
+            let selectId, inputId, dataObj;
+
+            if (type === 'std') {
+                selectId = 'stdItemSelect'; inputId = 'stdItemPrice'; dataObj = currentSettings.regular;
+            } else if (type === 'home') {
+                selectId = 'homeItemSelect'; inputId = 'homeItemPrice'; dataObj = currentSettings.home;
+            } else if (type === 'wage') {
+                selectId = 'wageItemSelect'; inputId = 'wageItemPrice'; dataObj = currentSettings.wages;
+            }
+
+            const selectedItem = document.getElementById(selectId).value;
+            document.getElementById(inputId).value = dataObj[selectedItem];
+        }
+
+        function updateTempState(type) {
+            let selectId, inputId, category;
+
+            if (type === 'std') {
+                selectId = 'stdItemSelect'; inputId = 'stdItemPrice'; category = 'regular';
+            } else if (type === 'home') {
+                selectId = 'homeItemSelect'; inputId = 'homeItemPrice'; category = 'home';
+            } else if (type === 'wage') {
+                selectId = 'wageItemSelect'; inputId = 'wageItemPrice'; category = 'wages';
+            }
+
+            const item = document.getElementById(selectId).value;
+            const price = parseFloat(document.getElementById(inputId).value) || 0;
+
+            // Update local state immediately
+            currentSettings[category][item] = price;
+        }
+
+        // --- 4. SAVE FUNCTION ---
+        function saveAllSettings() {
+            const btn = document.querySelector('button[onclick="saveAllSettings()"]');
+            const originalText = btn.innerHTML;
+
+            btn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Saving...`;
+            btn.disabled = true;
+
+            setTimeout(() => {
+                // Save to Browser Memory
+                localStorage.setItem('laundryPrices', JSON.stringify(currentSettings));
+
+                btn.classList.remove('btn-primary');
+                btn.classList.add('btn-success');
+                btn.innerHTML = `<i class="bi bi-check-lg me-2"></i>Saved!`;
+
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                    btn.classList.remove('btn-success');
+                    btn.classList.add('btn-primary');
+                    btn.disabled = false;
+                }, 2000);
+            }, 800);
+        }
+    </script>
+</body>
+</html>

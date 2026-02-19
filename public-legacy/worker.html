@@ -108,7 +108,7 @@
 
                             <div class="bg-light p-3 rounded-3 mb-3 border">
                                 <h6 class="small fw-bold text-primary mb-2 border-bottom pb-1">
-                                    Fixed Rate Items (₹7/pc)
+                                    Fixed Rate Items (₹3.5/pc)
                                 </h6>
                                 <div class="mb-1">
                                     <label class="small text-muted" style="font-size: 0.75rem;">Total Qty (Shirt / Pant / Salwar)</label>
@@ -193,58 +193,124 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     
-    <script>
+  <script>
         // --- CONFIGURATION ---
         const FIXED_RATE = 7; 
-
         let dailyLogs = [];
 
-        document.getElementById('workerForm').addEventListener('submit', function(e) {
+        // 1. STARTUP
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log("Page Loaded. Fetching logs...");
+            fetchLogs();
+        });
+
+        // 2. FETCH DATA
+        async function fetchLogs() {
+            try {
+                const response = await fetch('/api/worker-logs');
+                
+                if (!response.ok) {
+                    throw new Error(`Server Error: ${response.status}`);
+                }
+
+                const allLogs = await response.json();
+                console.log("Logs fetched from DB:", allLogs);
+
+                // Filter for Today
+                const todayStr = new Date().toDateString();
+                dailyLogs = allLogs.filter(log => new Date(log.date).toDateString() === todayStr);
+
+                renderTable();
+                updateTotals();
+            } catch (error) {
+                console.error("Error loading logs:", error);
+                // alert("Could not load logs. Is the server running?");
+            }
+        }
+
+        // 3. SUBMIT FORM
+        document.getElementById('workerForm').addEventListener('submit', async function(e) {
             e.preventDefault();
 
-            // 1. Get Values
+            // A. Get Data
             const workerName = document.getElementById('workerName').value;
-            const customerName = document.getElementById('customerRef').value; // New Field
-
-            // Quantities
+            const customerName = document.getElementById('customerRef').value;
+            
+            // B. Get Quantities (Handle empty inputs)
             const qFixed = parseInt(document.getElementById('qtyFixed').value) || 0;
             const qSaree = parseInt(document.getElementById('qtySaree').value) || 0;
             const rSaree = parseInt(document.getElementById('rateSaree').value) || 0; 
             const qSheet = parseInt(document.getElementById('qtySheet').value) || 0;
             const rSheet = parseInt(document.getElementById('rateSheet').value) || 0; 
 
-            // Validation
-            if(qFixed + qSaree + qSheet === 0) {
-                alert("Please enter quantities.");
+            // C. Validate
+            if(qFixed === 0 && qSaree === 0 && qSheet === 0) {
+                alert("Please enter at least one quantity!");
                 return;
             }
 
-            // 2. Calculation Logic
+            // D. Calculate
             const fixedPay = qFixed * FIXED_RATE;
             const variablePay = (qSaree * rSaree) + (qSheet * rSheet);
             const totalWage = fixedPay + variablePay;
 
-            // 3. Add to Log
-            const logEntry = {
-                id: Date.now(),
+            console.log("Calculated Wage:", totalWage);
+
+            // E. Create Object
+            const newLog = {
                 worker: workerName,
                 customer: customerName,
                 desc: formatDesc(qFixed, qSaree, qSheet),
                 amount: totalWage
             };
-            dailyLogs.push(logEntry);
 
-            // 4. Update Interface
-            renderTable();
-            updateTotals();
-            
-            // 5. Clear Inputs (Keep Worker Name)
-            document.getElementById('customerRef').value = '';
-            document.getElementById('qtyFixed').value = '';
-            document.getElementById('qtySaree').value = '';
-            document.getElementById('qtySheet').value = '';
+            // F. Send to Server
+            try {
+                const response = await fetch('/api/worker-logs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newLog)
+                });
+
+                if(response.ok) {
+                    // Success!
+                    fetchLogs(); // Reload list
+                    
+                    // Reset Inputs
+                    document.getElementById('customerRef').value = '';
+                    document.getElementById('qtyFixed').value = '';
+                    document.getElementById('qtySaree').value = '';
+                    document.getElementById('qtySheet').value = '';
+                    
+                    // Focus back on customer name for speed
+                    document.getElementById('customerRef').focus();
+                } else {
+                    const errText = await response.text();
+                    alert("Server failed to save: " + errText);
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Cannot connect to server. Check terminal.");
+            }
         });
 
+        // 4. DELETE
+        async function deleteLog(id) {
+            if(!confirm("Delete this entry?")) return;
+
+            try {
+                const response = await fetch(`/api/worker-logs/${id}`, { method: 'DELETE' });
+                if(response.ok) {
+                    fetchLogs();
+                } else {
+                    alert("Delete failed.");
+                }
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        // --- HELPERS ---
         function formatDesc(fix, sa, sh) {
             let parts = [];
             if(fix) parts.push(`${fix} Regular`);
@@ -258,12 +324,12 @@
             tbody.innerHTML = '';
             
             if (dailyLogs.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5"><i class="bi bi-clipboard-data display-4 d-block mb-2 opacity-25"></i>No logs added today.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-5">No logs added today.</td></tr>`;
                 return;
             }
 
-            // Show newest first
-            dailyLogs.slice().reverse().forEach(log => {
+            dailyLogs.forEach(log => {
+                const logID = log._id || log.id; 
                 tbody.innerHTML += `
                     <tr>
                         <td class="ps-4 fw-bold text-dark">${log.worker}</td>
@@ -271,7 +337,7 @@
                         <td class="small text-muted">${log.desc}</td>
                         <td class="text-success fw-bold">₹${log.amount}</td>
                         <td class="text-end pe-4">
-                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteLog(${log.id})">
+                            <button class="btn btn-sm btn-outline-danger border-0" onclick="deleteLog('${logID}')">
                                 <i class="bi bi-trash-fill"></i>
                             </button>
                         </td>
@@ -299,12 +365,6 @@
                     </div>
                 `;
             }
-        }
-
-        function deleteLog(id) {
-            dailyLogs = dailyLogs.filter(log => log.id !== id);
-            renderTable();
-            updateTotals();
         }
     </script>
 </body>

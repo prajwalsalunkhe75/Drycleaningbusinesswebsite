@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Owner Dashboard - Angel's Dry Cleaners</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* --- BADGE COLORS (Force Override) --- */
+        .badge {
+            font-size: 0.85em;
+            padding: 6px 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            border: 1px solid transparent;
+        }
+
+        /* PAID (Green) */
+        .badge-paid {
+            background-color: #d1fae5 !important;
+            color: #065f46 !important;
+            border-color: #a7f3d0 !important;
+        }
+
+        /* UNPAID (Red) */
+        .badge-unpaid {
+            background-color: #fee2e2 !important;
+            color: #991b1b !important;
+            border-color: #fecaca !important;
+        }
+
+        /* DELIVERED (Blue) */
+        .badge-delivered {
+            background-color: #e0e7ff !important;
+            color: #3730a3 !important;
+            border-color: #c7d2fe !important;
+        }
+
+        /* PENDING (Yellow/Orange) */
+        .badge-pending {
+            background-color: #ffedd5 !important;
+            color: #9a3412 !important;
+            border-color: #fed7aa !important;
+        }
+
+        /* Hover Effect for Buttons */
+        .badge:hover {
+            opacity: 0.8;
+            transform: scale(1.05);
+            transition: all 0.2s;
+        }
+    </style>
+</head>
+<body style="background-color: var(--bg-page);">
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top shadow-sm" style="background-color: var(--primary);">
+        <div class="collapse navbar-collapse" id="adminNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <li class="nav-item"><a class="nav-link active" href="dashboard.html">Overview</a></li>
+                <li class="nav-item"><a class="nav-link" href="records.html">Drycleaning</a></li>
+                <li class="nav-item"><a class="nav-link" href="customers.html">Monthly Billing</a></li>
+                <li class="nav-item"><a class="nav-link" href="worker.html">Worker Wages</a></li>
+                <li class="nav-item"><a class="nav-link" href="setting.html">Setting</a></li>
+                <li class="nav-item ms-lg-3"><a href="login.html" class="btn btn-outline-light btn-sm px-3 rounded-pill">Logout</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <div class="container py-5">
+        
+        <div class="d-flex justify-content-between align-items-end mb-4 dashboard-header">
+            <div>
+                <h2 class="fw-bold" style="color: var(--text-dark);">Dashboard</h2>
+                <p class="text-muted mb-0">Overview for <span id="currentDate">Today</span></p>
+            </div>
+            <button class="btn btn-primary d-none d-md-block shadow-sm" data-bs-toggle="modal" data-bs-target="#newOrderModal">
+                <i class="bi bi-plus-lg me-2"></i> New Ticket
+            </button>
+        </div>
+
+        <div class="row g-4 mb-5">
+            
+            <div class="col-md-4">
+                <div class="card feature-card border-0 shadow-sm h-100 p-4">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-circle me-3 mb-0 bg-warning bg-opacity-10 text-warning" style="width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                            <i class="bi bi-basket fs-4"></i>
+                        </div>
+                        <div>
+                            <p class="text-muted mb-0 small">Pending Orders</p>
+                            <h3 class="fw-bold mb-0 text-dark" id="statPending">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4">
+                <div class="card feature-card border-0 shadow-sm h-100 p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle me-3 mb-0 bg-success bg-opacity-10 text-success" style="width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                                <i class="bi bi-currency-rupee fs-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0 small" id="revenueLabel">Revenue (Today)</p>
+                                <h3 class="fw-bold mb-0 text-dark">₹<span id="statRevenue">0</span></h3>
+                            </div>
+                        </div>
+                        
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                <li><a class="dropdown-item small" href="#" onclick="switchRevenueView('today')">View Today</a></li>
+                                <li><a class="dropdown-item small" href="#" onclick="switchRevenueView('month')">View This Month</a></li>
+                                <li><a class="dropdown-item small" href="#" onclick="switchRevenueView('year')">View This Year</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card feature-card border-0 shadow-sm h-100 p-4">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div class="d-flex align-items-center">
+                            <div class="icon-circle me-3 mb-0 bg-danger bg-opacity-10 text-danger" style="width:50px; height:50px; display:flex; align-items:center; justify-content:center; border-radius:50%;">
+                                <i class="bi bi-people fs-4"></i>
+                            </div>
+                            <div>
+                                <p class="text-muted mb-0 small" id="expenseLabel">Staff Costs (Today)</p>
+                                <h3 class="fw-bold mb-0 text-dark">₹<span id="statExpense">0</span></h3>
+                            </div>
+                        </div>
+
+                        <div class="dropdown">
+                            <button class="btn btn-link text-muted p-0" type="button" data-bs-toggle="dropdown">
+                                <i class="bi bi-three-dots-vertical"></i>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end border-0 shadow">
+                                <li><a class="dropdown-item small" href="#" onclick="switchWageView('today')">View Today</a></li>
+                                <li><a class="dropdown-item small" href="#" onclick="switchWageView('month')">View This Month</a></li>
+                                <li><a class="dropdown-item small" href="#" onclick="switchWageView('year')">View This Year</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-12">
+                <div class="card feature-card border-0 shadow-sm h-100 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-3 px-4 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0 text-dark">Live Order Feed</h5>
+                        <input type="text" id="searchInput" class="form-control w-auto form-control-sm" placeholder="Search..." onkeyup="filterOrders()">
+                    </div>
+                    
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light">
+                                <tr>
+                                    <th class="ps-4" style="width: 100px;">Date</th>
+                                    <th class="ps-4">Ticket</th>
+                                    <th>Customer</th>
+                                    <th>Details</th>
+                                    <th class="text-center">Payment</th>
+                                    <th class="text-center">Delivery</th>
+                                    <th class="text-end pe-4">Total</th>
+
+                                    <th class="text-center">Receipt</th>
+
+                                    <th class="text-center">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="liveFeedTable">
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="modal fade" id="newOrderModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                
+                <div class="modal-header px-4 py-3" style="background-color: var(--primary); color: white;">
+                    <h5 class="modal-title fw-bold">Create New Ticket</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-0">
+                    <div class="row g-0">
+                        
+                        <div class="col-md-7 p-4 bg-white">
+                            <form id="smartOrderForm">
+                                <h6 class="fw-bold mb-3 text-primary">1. Customer Details</h6>
+                                <div class="row mb-3">
+                                    <div class="col-6">
+                                        <label class="small text-muted fw-bold">Phone</label>
+                                        <input type="text" class="form-control" id="custPhone" placeholder="987..." required>
+                                    </div>
+                                    <div class="col-6">
+                                        <label class="small text-muted fw-bold">Name</label>
+                                        <input type="text" class="form-control" id="custName" placeholder="Name" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-check form-switch mb-4 p-3 bg-light rounded border">
+                                    <input class="form-check-input" type="checkbox" id="isHomeDelivery">
+                                    <label class="form-check-label fw-bold small" for="isHomeDelivery">Home Delivery Rates</label>
+                                </div>
+
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6 class="fw-bold text-primary mb-0">2. Add Clothes</h6>
+                                    <div class="d-flex gap-3">
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="toggleIroning" checked onchange="toggleForms()">
+                                            <label class="form-check-label small fw-bold" for="toggleIroning">Ironing</label>
+                                        </div>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="toggleDryclean" onchange="toggleForms()">
+                                            <label class="form-check-label small fw-bold" for="toggleDryclean">Dry Clean</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                               <div id="ironingSection" class="p-3 bg-light rounded mb-3 border" style="border-left: 4px solid var(--primary) !important;">
+                                    <div class="row g-2">
+                                        <div class="col-6">
+                                            <select class="form-select form-select-sm" id="ironType" onchange="toggleIronOther(this)">
+                                                <option value="shirt">Shirt</option>
+                                                <option value="pant">Pant</option>
+                                                <option value="saree">Saree</option>
+                                                <option value="blazer">Blazer</option>
+                                                <option value="Bedsheet">Bedsheet</option>
+                                                <option value="other">Other (Specify)</option> 
+                                                <option value="steam">Steam Press (Variable)</option>
+                                            </select>
+                                            
+                                            <div id="ironOtherDiv" class="mt-2 row g-1" style="display: none;">
+                                                <div class="col-7">
+                                                    <input type="text" id="customIronName" class="form-control form-control-sm" placeholder="Name">
+                                                </div>
+                                                <div class="col-5">
+                                                    <input type="number" id="customIronRate" class="form-control form-control-sm" placeholder="Rate ₹">
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <input type="number" class="form-control form-control-sm" id="ironQty" value="1" min="1" placeholder="Qty">
+                                        </div>
+                                        <div class="col-3">
+                                            <button type="button" class="btn btn-sm btn-primary w-100" onclick="addIroningItem()">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                               <div id="drycleanSection" class="p-3 bg-light rounded mb-3 border" style="border-left: 4px solid #dc3545 !important; display: none;">
+                                    <div class="row g-2">
+                                        <div class="col-4">
+                                            <input type="text" class="form-control form-control-sm" id="dcItem" placeholder="Item Name">
+                                        </div>
+                                        <div class="col-2">
+                                            <input type="number" class="form-control form-control-sm" id="dcRate" placeholder="Rate">
+                                        </div>
+                                        <div class="col-2">
+                                            <input type="number" class="form-control form-control-sm" id="dcQty" value="1" placeholder="Qty">
+                                        </div>
+                                        <div class="col-2">
+                                            <input type="number" class="form-control form-control-sm" id="dcStain" placeholder="Stain ₹">
+                                        </div>
+                                        <div class="col-2">
+                                            <button type="button" class="btn btn-sm btn-danger w-100" onclick="addDryCleanItem()">Add</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <ul class="list-group mb-3 small" id="miniCartList" style="min-height: 50px;">
+                                    <li class="list-group-item text-center text-muted">No items yet.</li>
+                                </ul>
+
+                                <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                                    <h4 class="fw-bold text-primary mb-0">₹<span id="runningTotal">0</span></h4>
+                                    <button type="button" onclick="showReceiptPreview()" class="btn btn-dark px-4 shadow-sm">
+                                        Generate Receipt
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <div class="col-md-5 p-4 bg-light d-flex align-items-center justify-content-center">
+                            
+                            <div id="receiptPlaceholder" class="text-center text-muted">
+                                <i class="bi bi-receipt display-4"></i>
+                                <p class="small mt-2">Preview will appear here</p>
+                            </div>
+                            
+                            <div id="finalReceipt" class="bg-white p-3 shadow w-100 font-monospace" style="display: none;">
+                                <div class="text-center border-bottom pb-2 mb-2">
+                                    <h6 class="fw-bold text-uppercase mb-0">Angel's Dry Cleaners</h6>
+                                    <small>Ticket #<span id="rcptTicket"></span></small>
+                                </div>
+                                <div class="mb-2">
+                                    <strong>Name:</strong> <span id="rcptName"></span><br>
+                                    <strong>Phone:</strong> <span id="rcptPhone"></span><br>
+                                    <strong>Date:</strong> <span id="rcptDateIn"></span>
+                                </div>
+                                <table class="table table-sm table-borderless mb-0">
+                                    <tbody id="rcptItems"></tbody>
+                                </table>
+                                <div class="border-top pt-2 mt-2 d-flex justify-content-between fw-bold">
+                                    <span>Total</span>
+                                    <span>₹<span id="rcptTotal"></span></span>
+                                </div>
+                                <button class="btn btn-success w-100 mt-3" onclick="confirmAndSave()">Print & Save</button>
+                            </div>
+
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+        // ==========================================
+        // 1. CONFIGURATION & STATE
+        // ==========================================
+        // LOAD SETTINGS FROM LOCAL STORAGE (Or use defaults)
+        let IRONING_PRICES = {
+            regular: { shirt: 8, pant: 8, saree: 120, blazer: 120, bedsheet: 30 },
+            home: { shirt: 15, pant: 15, saree: 150, blazer: 150, bedsheet: 40 }
+        };
+
+        const savedPrices = localStorage.getItem('laundryPrices');
+        if(savedPrices) {
+            const parsed = JSON.parse(savedPrices);
+            IRONING_PRICES.regular = parsed.regular;
+            IRONING_PRICES.home = parsed.home;
+            // Note: Dashboard doesn't need 'wages', but worker.html will
+        }
+
+        let currentCart = [];
+        let allOrders = [];
+        
+        // GLOBAL STATS STORAGE
+        let revenueData = { today: 0, month: 0, year: 0 };
+        let wageData = { today: 0, month: 0, year: 0 };
+
+        // ==========================================
+        // 2. INITIALIZATION
+        // ==========================================
+        document.addEventListener('DOMContentLoaded', () => {
+            const dateOptions = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').innerText = new Date().toLocaleDateString('en-IN', dateOptions);
+
+            fetchOrdersFromDB();
+            fetchWagesFromDB();
+        });
+
+        // ==========================================
+        // 3. CORE DATA FETCHING
+        // ==========================================
+        async function fetchOrdersFromDB() {
+            try {
+                const res = await fetch('/api/orders');
+                allOrders = await res.json();
+                renderLiveFeed();
+                calculateRevenueStats();
+                updatePendingCount();
+            } catch (err) { console.error("Error fetching orders:", err); }
+        }
+
+        async function fetchWagesFromDB() {
+            try {
+                const res = await fetch('/api/worker-logs'); 
+                if(!res.ok) throw new Error("No worker logs found");
+                const logs = await res.json();
+                calculateWageStats(logs);
+            } catch (err) { console.warn("Worker stats skipped"); }
+        }
+
+        // ==========================================
+        // 4. STATS ENGINE
+        // ==========================================
+        function calculateRevenueStats() {
+            const now = new Date();
+            const todayStr = now.toDateString(); 
+            const currentMonth = now.getMonth(); 
+            const currentYear = now.getFullYear();
+
+            revenueData = { today: 0, month: 0, year: 0 };
+
+            allOrders.forEach(order => {
+                if (order.paymentStatus === 'Paid') {
+                    const d = new Date(order.date);
+                    const amt = parseFloat(order.totalAmount) || 0;
+                    if (d.toDateString() === todayStr) revenueData.today += amt;
+                    if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) revenueData.month += amt;
+                    if (d.getFullYear() === currentYear) revenueData.year += amt;
+                }
+            });
+            switchRevenueView('today');
+        }
+
+        function updatePendingCount() {
+            const pendingCount = allOrders.filter(o => o.status !== 'Delivered').length;
+            document.getElementById('statPending').innerText = pendingCount;
+        }
+
+        function calculateWageStats(logs) {
+            const now = new Date();
+            const todayStr = now.toDateString(); 
+            const currentMonth = now.getMonth(); 
+            const currentYear = now.getFullYear();
+
+            wageData = { today: 0, month: 0, year: 0 };
+
+            logs.forEach(log => {
+                const d = new Date(log.date);
+                const amt = parseFloat(log.amount) || 0;
+                if (d.toDateString() === todayStr) wageData.today += amt;
+                if (d.getMonth() === currentMonth && d.getFullYear() === currentYear) wageData.month += amt;
+                if (d.getFullYear() === currentYear) wageData.year += amt;
+            });
+            switchWageView('today');
+        }
+
+        // ==========================================
+        // 5. DROPDOWN SWITCHERS
+        // ==========================================
+        function switchRevenueView(period) {
+            const lbl = document.getElementById('revenueLabel');
+            const val = document.getElementById('statRevenue');
+            if(period === 'today') { lbl.innerText="Revenue (Today)"; val.innerText=revenueData.today.toLocaleString('en-IN'); }
+            if(period === 'month') { lbl.innerText="Revenue (Month)"; val.innerText=revenueData.month.toLocaleString('en-IN'); }
+            if(period === 'year') { lbl.innerText="Revenue (Year)"; val.innerText=revenueData.year.toLocaleString('en-IN'); }
+        }
+
+        function switchWageView(period) {
+            const lbl = document.getElementById('expenseLabel');
+            const val = document.getElementById('statExpense');
+            if(period === 'today') { lbl.innerText="Staff Costs (Today)"; val.innerText=wageData.today.toLocaleString('en-IN'); }
+            if(period === 'month') { lbl.innerText="Staff Costs (Month)"; val.innerText=wageData.month.toLocaleString('en-IN'); }
+            if(period === 'year') { lbl.innerText="Staff Costs (Year)"; val.innerText=wageData.year.toLocaleString('en-IN'); }
+        }
+
+        // ==========================================
+        // 6. LIVE FEED LOGIC (With WhatsApp Button)
+        // ==========================================
+        function renderLiveFeed(data = allOrders) {
+            const tbody = document.getElementById('liveFeedTable');
+            tbody.innerHTML = "";
+
+            if (data.length === 0) {
+                // Note: colSpan is 9 to account for all columns including receipt & delete
+                tbody.innerHTML = `<tr><td colspan="9" class="text-center py-4 text-muted">No orders found</td></tr>`;
+                return;
+            }
+
+            const sortedData = data.slice().sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            sortedData.forEach(order => {
+                const payStatus = order.paymentStatus || 'Unpaid';
+                const payClass = payStatus === 'Paid' ? 'badge-paid' : 'badge-unpaid';
+                const delStatus = order.status || 'Pending';
+                const delClass = delStatus === 'Delivered' ? 'badge-delivered' : 'badge-pending';
+                
+                const dateObj = new Date(order.date);
+                const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short' });
+
+                let details = "Manual Entry";
+                if(order.items && order.items.length > 0) {
+                    details = order.items.map(i => `${i.qty} x ${i.type}`).join(', ');
+                }
+
+                // --- WHATSAPP LOGIC ---
+                let waItems = "";
+                if(order.items) {
+                    order.items.forEach(i => {
+                        waItems += `• ${i.qty} x ${i.type} - ₹${i.price}%0A`; 
+                    });
+                }
+
+                const shopName = "*Angel's Dry Cleaners*";
+                const message = `🧾 *INVOICE / RECEIPT*%0A${shopName}%0A--------------------------------%0ATicket No: *${order.id}*%0ADate: ${dateObj.toLocaleDateString()}%0ACustomer: ${order.customerName}%0A--------------------------------%0A*Items:*%0A${waItems}--------------------------------%0A*TOTAL AMOUNT: ₹${order.totalAmount}*%0APayment: ${payStatus}%0AStatus: ${delStatus}%0A--------------------------------%0AThank you! 🙏`;
+                
+                // Assuming +91 for India. Remove '91' if you type country codes manually.
+                const waLink = `https://wa.me/91${order.phone}?text=${message}`; 
+
+                // --- RENDER ROW ---
+                tbody.innerHTML += `
+                    <tr>
+                        <td class="ps-4 text-muted small fw-bold">${dateStr}</td>
+                        <td class="fw-bold">#${order.id}</td>
+                        <td>${order.customerName}<br><small class="text-muted">${order.phone || ''}</small></td>
+                        <td class="small text-muted" title="${details}" style="max-width:200px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                            ${details}
+                        </td>
+                        <td class="text-center">
+                            <span class="badge ${payClass} rounded-pill" style="cursor: pointer;" onclick="togglePay(String('${order.id}'), '${payStatus}')">
+                                ${payStatus}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge ${delClass} rounded-pill" style="cursor: pointer;" onclick="toggleDel(String('${order.id}'), '${delStatus}')">
+                                ${delStatus}
+                            </span>
+                        </td>
+                        <td class="text-end pe-4 fw-bold">₹${order.totalAmount}</td>
+                        
+                        <td class="text-center">
+                            <a href="${waLink}" target="_blank" class="btn btn-sm btn-success rounded-circle shadow-sm" title="Send Receipt">
+                                <i class="bi bi-whatsapp"></i>
+                            </a>
+                        </td>
+
+                        <td>
+                            <button class="btn btn-sm text-danger" onclick="deleteOrder(String('${order.id}'))">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        // ==========================================
+        // 7. ACTIONS
+        // ==========================================
+        async function togglePay(id, current) {
+            const newVal = current === 'Paid' ? 'Unpaid' : 'Paid';
+            await fetch(`/api/orders/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({paymentStatus: newVal}) });
+            fetchOrdersFromDB(); 
+        }
+
+        async function toggleDel(id, current) {
+            const newVal = current === 'Delivered' ? 'Pending' : 'Delivered';
+            await fetch(`/api/orders/${id}`, { method: 'PATCH', headers: {'Content-Type':'application/json'}, body: JSON.stringify({status: newVal}) });
+            fetchOrdersFromDB(); 
+        }
+
+        async function deleteOrder(id) {
+            if(confirm("Delete ticket?")) {
+                await fetch(`/api/orders/${id}`, { method: 'DELETE' });
+                fetchOrdersFromDB();
+            }
+        }
+
+        // ==========================================
+        // 8. CART & FORM LOGIC
+        // ==========================================
+        function toggleForms() {
+            const showIron = document.getElementById('toggleIroning').checked;
+            const showDry = document.getElementById('toggleDryclean').checked;
+            document.getElementById('ironingSection').style.display = showIron ? 'block' : 'none';
+            document.getElementById('drycleanSection').style.display = showDry ? 'block' : 'none';
+        }
+
+        // --- NEW: Toggle "Other" OR "Steam" Inputs ---
+        function toggleIronOther(selectElement) {
+            const otherDiv = document.getElementById('ironOtherDiv');
+            const nameInput = document.getElementById('customIronName');
+
+            // Show inputs if "Other" OR "Steam" is selected
+            if (selectElement.value === 'other' || selectElement.value === 'steam') {
+                otherDiv.style.display = 'flex';
+                
+                // Change Placeholder for better UX
+                if(selectElement.value === 'steam') {
+                    nameInput.placeholder = "Cloth Name (e.g. Silk Saree)";
+                } else {
+                    nameInput.placeholder = "Item Name";
+                }
+            } else {
+                otherDiv.style.display = 'none';
+            }
+        }
+
+        // --- NEW: Add Ironing Item (Handling Steam & Other) ---
+        function addIroningItem() {
+            const type = document.getElementById('ironType').value;
+            const qty = parseInt(document.getElementById('ironQty').value);
+            const isHome = document.getElementById('isHomeDelivery').checked;
+
+            if (qty < 1 || isNaN(qty)) { alert("Invalid Qty"); return; }
+
+            let name = "";
+            let rate = 0;
+
+            // CASE 1: MANUAL ENTRY (Other or Steam)
+            if (type === 'other' || type === 'steam') {
+                const rawName = document.getElementById('customIronName').value;
+                rate = parseFloat(document.getElementById('customIronRate').value);
+                
+                if (!rawName || isNaN(rate)) { alert("Please enter Cloth Name and Rate"); return; }
+                
+                // Label formatting
+                const label = type === 'steam' ? " (Steam)" : " (Other)";
+                name = rawName.charAt(0).toUpperCase() + rawName.slice(1) + label;
+            } 
+            // CASE 2: STANDARD ITEMS
+            else {
+                name = type.toUpperCase();
+                rate = isHome ? IRONING_PRICES.home[type] : IRONING_PRICES.regular[type];
+            }
+
+            const total = rate * qty;
+
+            currentCart.push({ name: name, category: 'Ironing', qty, rate, total: total });
+            
+            // Clear Manual Inputs
+            document.getElementById('customIronName').value = "";
+            document.getElementById('customIronRate').value = "";
+            
+            renderCart();
+        }
+
+        function addDryCleanItem() {
+            const name = document.getElementById('dcItem').value;
+            const rate = parseFloat(document.getElementById('dcRate').value);
+            const qty = parseInt(document.getElementById('dcQty').value);
+            const stain = parseFloat(document.getElementById('dcStain').value) || 0;
+            if (!name || isNaN(rate)) { alert("Check details"); return; }
+            const total = (rate * qty) + stain;
+            const displayName = stain > 0 ? `${name} (+₹${stain} Stain)` : name;
+            currentCart.push({ name: displayName, category: 'DryClean', qty, rate, total });
+            
+            document.getElementById('dcItem').value = "";
+            document.getElementById('dcRate').value = "";
+            document.getElementById('dcStain').value = "";
+            document.getElementById('dcQty').value = "1";
+            renderCart();
+        }
+
+        function renderCart() {
+            const list = document.getElementById('miniCartList');
+            list.innerHTML = "";
+            if (currentCart.length === 0) list.innerHTML = `<li class="list-group-item text-center text-muted">No items yet.</li>`;
+            else {
+                currentCart.forEach((item, idx) => {
+                    const color = item.category === 'Ironing' ? 'text-primary' : 'text-danger';
+                    list.innerHTML += `<li class="list-group-item d-flex justify-content-between align-items-center"><div><span class="fw-bold">${item.qty} x ${item.name}</span><br><small class="${color}" style="font-size:0.75rem">${item.category}</small></div><div class="d-flex align-items-center gap-3"><span>₹${item.total}</span><i class="bi bi-x-circle-fill text-danger" style="cursor:pointer" onclick="removeFromCart(${idx})"></i></div></li>`;
+                });
+            }
+            document.getElementById('runningTotal').innerText = currentCart.reduce((sum, i) => sum + i.total, 0);
+        }
+
+        function removeFromCart(idx) { currentCart.splice(idx, 1); renderCart(); }
+
+        function showReceiptPreview() {
+            if (currentCart.length === 0) { alert("Cart is empty"); return; }
+            const name = document.getElementById('custName').value;
+            if (!name) { alert("Enter Name"); return; }
+            
+            // SMART ID LOGIC
+            const hasIron = currentCart.some(item => item.category === 'Ironing');
+            const hasDry  = currentCart.some(item => item.category === 'DryClean');
+            
+            let prefix = "GEN"; 
+            if (hasIron && hasDry) prefix = "MIX"; 
+            else if (hasIron) prefix = "IRN"; 
+            else if (hasDry) prefix = "DRY"; 
+
+            const randomNum = Math.floor(1000 + Math.random() * 9000);
+            const smartID = `${prefix}-${randomNum}`;
+
+            document.getElementById('rcptName').innerText = name;
+            document.getElementById('rcptPhone').innerText = document.getElementById('custPhone').value;
+            document.getElementById('rcptTicket').innerText = smartID; 
+            document.getElementById('rcptDateIn').innerText = new Date().toLocaleDateString();
+            document.getElementById('rcptTotal').innerText = document.getElementById('runningTotal').innerText;
+
+            const tbody = document.getElementById('rcptItems');
+            tbody.innerHTML = "";
+            currentCart.forEach(item => { 
+                tbody.innerHTML += `<tr><td>${item.qty} x ${item.name}</td><td class="text-end">₹${item.total}</td></tr>`; 
+            });
+
+            document.getElementById('receiptPlaceholder').style.display = 'none';
+            document.getElementById('finalReceipt').style.display = 'block';
+        }
+
+        async function confirmAndSave() {
+            const smartID = document.getElementById('rcptTicket').innerText;
+
+            const newOrder = {
+                id: smartID, 
+                customerName: document.getElementById('rcptName').innerText,
+                phone: document.getElementById('rcptPhone').innerText,
+                items: currentCart.map(i => ({ type: i.name, qty: i.qty, price: i.total })),
+                totalAmount: parseFloat(document.getElementById('rcptTotal').innerText),
+                status: 'Pending',
+                paymentStatus: 'Unpaid',
+                origin: 'dashboard',
+                date: new Date()
+            };
+
+            try {
+                const res = await fetch('/api/orders', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(newOrder) });
+                
+                if (res.ok) {
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('newOrderModal'));
+                    modal.hide();
+                    
+                    document.getElementById('smartOrderForm').reset();
+                    currentCart = [];
+                    renderCart();
+                    
+                    document.getElementById('receiptPlaceholder').style.display = 'block';
+                    document.getElementById('finalReceipt').style.display = 'none';
+                    
+                    alert(`Ticket ${smartID} Saved!`); 
+                    fetchOrdersFromDB();
+                } else {
+                    alert("Error: Server rejected the order (Duplicate ID?)");
+                }
+            } catch (err) { console.error(err); }
+        }
+        
+        function filterOrders() {
+            const q = document.getElementById('searchInput').value.toLowerCase();
+            const filtered = allOrders.filter(o => o.customerName.toLowerCase().includes(q) || o.id.toString().includes(q));
+            renderLiveFeed(filtered);
+        }
+    </script>
+</body>
+</html>
