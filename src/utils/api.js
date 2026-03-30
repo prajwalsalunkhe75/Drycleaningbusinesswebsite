@@ -7,11 +7,15 @@ import axios from 'axios'
 // In production, the Express server serves both API and frontend.
 // For ngrok/remote access, set VITE_API_URL in your .env file.
 const getBaseURL = () => {
+  // For production on Replit, use the backend URL explicitly
+  if (import.meta.env.PROD) {
+    return 'https://e24fbeaf-b042-4f59-abbb-23ca3343f799-00-upza3ll3riqy.pike.replit.dev/api'
+  }
   // Check for explicit override via environment variable
   if (import.meta.env.VITE_API_URL) {
     return `${import.meta.env.VITE_API_URL}/api`
   }
-  // Default: use relative URL (works with both Vite proxy and production)
+  // Default for development: use relative URL (works with Vite proxy)
   return '/api'
 }
 
