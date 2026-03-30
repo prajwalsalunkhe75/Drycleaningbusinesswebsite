@@ -90,7 +90,7 @@
                             
                             <div class="mb-3">
                                 <label class="small text-muted fw-bold">1. Select Worker</label>
-                                <div class="input-group">
+                                <div class="input-group mb-2">
                                     <span class="input-group-text bg-light border-end-0"><i class="bi bi-person"></i></span>
                                     <select class="form-select form-control border-start-0 ps-1" id="workerName">
                                         <option value="Raju">Raju</option>
@@ -98,6 +98,12 @@
                                         <option value="Amit">Amit</option>
                                         <option value="Priya">Priya</option>
                                     </select>
+                                </div>
+                                <div class="input-group input-group-sm">
+                                    <input type="text" class="form-control" id="newWorkerInput" placeholder="Add new worker name">
+                                    <button class="btn btn-outline-primary" type="button" id="addWorkerBtn">
+                                        <i class="bi bi-plus-circle"></i> Add
+                                    </button>
                                 </div>
                             </div>
 
@@ -197,10 +203,78 @@
         // --- CONFIGURATION ---
         const FIXED_RATE = 7; 
         let dailyLogs = [];
+        const WORKERS_STORAGE_KEY = 'drycleaning_workers';
 
-        // 1. STARTUP
+        // --- WORKER MANAGEMENT ---
+        function loadWorkersFromStorage() {
+            const stored = localStorage.getItem(WORKERS_STORAGE_KEY);
+            return stored ? JSON.parse(stored) : ['Raju', 'Sunita', 'Amit', 'Priya'];
+        }
+
+        function saveWorkersToStorage(workers) {
+            localStorage.setItem(WORKERS_STORAGE_KEY, JSON.stringify([...new Set(workers)])); // Remove duplicates
+        }
+
+        function populateWorkerSelect() {
+            const workers = loadWorkersFromStorage();
+            const select = document.getElementById('workerName');
+            const currentValue = select.value;
+            
+            select.innerHTML = '';
+            workers.forEach(worker => {
+                const option = document.createElement('option');
+                option.value = worker;
+                option.textContent = worker;
+                select.appendChild(option);
+            });
+            
+            select.value = currentValue;
+        }
+
+        function addNewWorker() {
+            const input = document.getElementById('newWorkerInput');
+            const workerName = input.value.trim();
+
+            if (!workerName) {
+                alert("Please enter a worker name");
+                return;
+            }
+
+            const workers = loadWorkersFromStorage();
+            
+            if (workers.includes(workerName)) {
+                alert("This worker already exists");
+                input.value = '';
+                input.focus();
+                return;
+            }
+
+            workers.push(workerName);
+            saveWorkersToStorage(workers);
+            populateWorkerSelect();
+            
+            // Select the newly added worker
+            document.getElementById('workerName').value = workerName;
+            input.value = '';
+            input.focus();
+        }
+
+        // --- STARTUP ---
         document.addEventListener('DOMContentLoaded', () => {
-            console.log("Page Loaded. Fetching logs...");
+            console.log("Page Loaded. Initializing workers...");
+            populateWorkerSelect();
+            
+            // Add event listener for new worker button
+            document.getElementById('addWorkerBtn').addEventListener('click', addNewWorker);
+            
+            // Allow Enter key to add worker
+            document.getElementById('newWorkerInput').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addNewWorker();
+                }
+            });
+            
+            console.log("Fetching logs...");
             fetchLogs();
         });
 

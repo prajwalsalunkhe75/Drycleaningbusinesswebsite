@@ -16,7 +16,10 @@ const OrderSchema = new mongoose.Schema({
 
     totalAmount: { type: Number, required: true },
     
-    paymentStatus: { type: String, default: 'Unpaid' }, // Paid / Unpaid
+    paymentStatus: { type: String, enum: ['Paid', 'Unpaid', 'Partial'], default: 'Unpaid' },
+    advanceAmount: { type: Number, default: 0 },
+    paymentMethod: { type: String, enum: ['Cash', 'UPI', 'Card', 'Other'], default: 'Cash' },
+    evidencePhotos: [{ type: String }],
     status: { type: String, default: 'Pending' },       // Pending / Delivered
     
     origin: { type: String, default: 'dashboard' },     // 'dashboard' or 'ledger'

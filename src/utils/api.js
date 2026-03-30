@@ -1,31 +1,59 @@
 import axios from 'axios'
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || '/api'
+// ==========================================
+// CONFIGURATION: Smart base URL detection
+// ==========================================
+// In development (Vite dev server), proxy is used so relative URL works.
+// In production, the Express server serves both API and frontend.
+// For ngrok/remote access, set VITE_API_URL in your .env file.
+const getBaseURL = () => {
+  // Check for explicit override via environment variable
+  if (import.meta.env.VITE_API_URL) {
+    return `${import.meta.env.VITE_API_URL}/api`
+  }
+  // Default: use relative URL (works with both Vite proxy and production)
+  return '/api'
+}
 
 const api = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getBaseURL(),
   headers: {
     'Content-Type': 'application/json',
-  },
+    // Bypass ngrok's warning page (only needed when using ngrok)
+    'ngrok-skip-browser-warning': '69420'
+  }
 })
 
 // ==========================================
-// NEW: SECURITY INTERCEPTOR (The "VIP Pass")
+// SECURITY INTERCEPTOR (Attach Token)
 // ==========================================
 api.interceptors.request.use(
   (config) => {
-    // 1. Look for the token in the browser's memory
-    const token = localStorage.getItem('adminToken');
-    
-    // 2. If it exists, attach it to the request header
+    const token = localStorage.getItem('adminToken')
     if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
+      config.headers['Authorization'] = `Bearer ${token}`
     }
-    
-    return config;
+    return config
   },
   (error) => {
-    return Promise.reject(error);
+    return Promise.reject(error)
+  }
+)
+
+// ==========================================
+// RESPONSE INTERCEPTOR (Auto-logout on expired token)
+// ==========================================
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // If server returns 401 or 403, token is invalid/expired — auto logout
+    if (error.response && (error.response.status === 401 || error.response.status === 403)) {
+      localStorage.removeItem('adminToken')
+      localStorage.removeItem('isAuthenticated')
+      // Redirect to login page
+      window.location.href = '/login'
+    }
+    return Promise.reject(error)
   }
 )
 
@@ -35,7 +63,7 @@ api.interceptors.request.use(
 
 // Orders API
 export const ordersAPI = {
-  getAll: () => api.get('/orders'),
+  getAll: (page = 1, limit = 10) => api.get('/orders', { params: { page, limit } }),
   create: (data) => api.post('/orders', data),
   update: (id, data) => api.patch(`/orders/${id}`, data),
   delete: (id) => api.delete(`/orders/${id}`),
@@ -43,7 +71,7 @@ export const ordersAPI = {
 
 // Customers API
 export const customersAPI = {
-  getAll: () => api.get('/customers'),
+  getAll: (page = 1, limit = 10) => api.get('/customers', { params: { page, limit } }),
   create: (data) => api.post('/customers', data),
   update: (id, data) => api.patch(`/customers/${id}`, data),
   delete: (id) => api.delete(`/customers/${id}`),
@@ -54,6 +82,24 @@ export const workerLogsAPI = {
   getAll: () => api.get('/worker-logs'),
   create: (data) => api.post('/worker-logs', data),
   delete: (id) => api.delete(`/worker-logs/${id}`),
+}
+
+// Settings API
+export const settingsAPI = {
+  get: () => api.get('/settings'),
+  save: (data) => api.post('/settings', data),
+}
+
+// Workers API
+export const workersAPI = {
+  getAll: () => api.get('/workers'),
+  create: (name) => api.post('/workers', { name }),
+  delete: (id) => api.delete(`/workers/${id}`),
+}
+
+// AI API
+export const aiAPI = {
+  parseVoice: (text, apiKey) => api.post('/ai/parse-voice', { text, apiKey }),
 }
 
 export default api
