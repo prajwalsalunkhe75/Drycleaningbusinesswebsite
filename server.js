@@ -626,21 +626,65 @@ app.use((req, res, next) => {
 });
 
 // --- START SERVER ---
-const connectDB = async () => {
-    try {
-        await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/laundryDB');
-        console.log(`✅ MongoDB Connected`);
-        return true;
-    } catch (error) {
-        console.error(`❌ DB Error: ${error.message}`);
-        return false;
+const connectDB = async (retries = 5) => {
+    const options = {
+        serverSelectionTimeoutMS: 10000,
+        socketTimeoutMS: 45000,
+        maxPoolSize: 10,
+        minPoolSize: 2,
+        heartbeatFrequencyMS: 10000,
+    };
+
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            await mongoose.connect(process.env.MONGO_URI || 'mongodb://127.0.0.1:27017/laundryDB', options);
+            console.log(`✅ MongoDB Connected (attempt ${attempt})`);
+            return true;
+        } catch (error) {
+            console.error(`❌ DB connect attempt ${attempt}/${retries} failed: ${error.message}`);
+            if (attempt < retries) {
+                const delay = Math.min(attempt * 2000, 10000);
+                console.log(`⏳ Retrying in ${delay / 1000}s...`);
+                await new Promise(r => setTimeout(r, delay));
+            }
+        }
     }
+    return false;
 };
 
+// Auto-reconnect on disconnect
+mongoose.connection.on('disconnected', () => {
+    console.log('⚠️ MongoDB disconnected. Attempting reconnect...');
+    setTimeout(() => connectDB(3), 3000);
+});
+
+mongoose.connection.on('reconnected', () => {
+    console.log('✅ MongoDB reconnected successfully');
+});
+
+mongoose.connection.on('error', (err) => {
+    console.error('❌ MongoDB connection error:', err.message);
+});
+
+// Health check endpoint (public, no auth)
+app.get('/api/health', async (req, res) => {
+    const dbState = mongoose.connection.readyState;
+    const states = { 0: 'disconnected', 1: 'connected', 2: 'connecting', 3: 'disconnecting' };
+    res.json({
+        status: dbState === 1 ? 'ok' : 'degraded',
+        db: states[dbState] || 'unknown',
+        uptime: Math.floor(process.uptime()),
+        timestamp: new Date().toISOString()
+    });
+});
+
 const startServer = async () => {
-    if (await connectDB()) {
-        app.listen(PORT, () => console.log(`🚀 Server on http://localhost:${PORT}`));
-    }
+    const dbConnected = await connectDB();
+    // Start server even if DB is temporarily down — it will auto-reconnect
+    app.listen(PORT, () => {
+        console.log(`🚀 Server on http://localhost:${PORT}`);
+        if (!dbConnected) console.log('⚠️ Server started without DB — will auto-reconnect');
+    });
 };
 
 startServer();
