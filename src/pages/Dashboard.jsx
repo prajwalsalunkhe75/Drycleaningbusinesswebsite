@@ -611,7 +611,7 @@ const Dashboard = () => {
         {/* Desktop View */}
         <div className="hidden md:block overflow-x-auto">
           <table className="w-full text-left border-collapse">
-            <thead className="bg-gray-50 dark:bg-slate-750">
+            <thead className="bg-gray-50 dark:bg-slate-700">
               <tr>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Date</th>
                 <th className="px-6 py-3 text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase">Ticket</th>
@@ -629,7 +629,7 @@ const Dashboard = () => {
                 <tr><td colSpan="9" className="px-6 py-12 text-center text-gray-400 dark:text-gray-500">No orders found</td></tr>
               ) : (
                 processedOrders.map((order) => (
-                  <tr key={order._id || order.id} className="hover:bg-gray-50 dark:hover:bg-slate-750 transition-colors">
+                  <tr key={order._id || order.id} className="hover:bg-gray-50 dark:hover:bg-slate-700/50 transition-colors">
                     <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400">{order.dateStr}</td>
                     <td className="px-6 py-4 text-sm font-bold text-gray-800 dark:text-gray-200">#{order.id}</td>
                     <td className="px-6 py-4">

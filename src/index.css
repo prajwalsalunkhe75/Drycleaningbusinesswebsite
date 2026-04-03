@@ -10,6 +10,53 @@
   html.dark {
     color-scheme: dark;
   }
+
+  /* Global dark mode text & background fixes */
+  html.dark table {
+    @apply text-gray-200;
+  }
+  html.dark thead {
+    @apply bg-slate-700;
+  }
+  html.dark th {
+    @apply text-gray-400;
+  }
+  html.dark td {
+    @apply text-gray-300;
+  }
+  html.dark tr:hover {
+    @apply bg-slate-700/50;
+  }
+  html.dark .bg-white {
+    @apply bg-slate-800;
+  }
+  html.dark .bg-gray-50 {
+    @apply bg-slate-700;
+  }
+  html.dark .text-text-dark {
+    @apply text-gray-100;
+  }
+  html.dark .text-gray-800 {
+    @apply text-gray-200;
+  }
+  html.dark .text-gray-700 {
+    @apply text-gray-300;
+  }
+  html.dark .text-gray-600 {
+    @apply text-gray-400;
+  }
+  html.dark .border-gray-200 {
+    @apply border-slate-700;
+  }
+  html.dark .border-gray-100 {
+    @apply border-slate-700;
+  }
+  html.dark .divide-gray-200 > :not([hidden]) ~ :not([hidden]) {
+    @apply border-slate-700;
+  }
+  html.dark .divide-gray-100 > :not([hidden]) ~ :not([hidden]) {
+    @apply border-slate-700;
+  }
 }
 
 @layer components {
