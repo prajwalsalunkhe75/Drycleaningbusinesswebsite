@@ -7,9 +7,9 @@ import axios from 'axios'
 // In production, the Express server serves both API and frontend.
 // For ngrok/remote access, set VITE_API_URL in your .env file.
 const getBaseURL = () => {
-  // For production on Replit, use the backend URL explicitly
+  // For production, the Express server serves both API and frontend.
   if (import.meta.env.PROD) {
-    return 'https://e24fbeaf-b042-4f59-abbb-23ca3343f799-00-upza3ll3riqy.pike.replit.dev/api'
+    return '/api'
   }
   // Check for explicit override via environment variable
   if (import.meta.env.VITE_API_URL) {
@@ -99,6 +99,11 @@ export const workersAPI = {
   getAll: () => api.get('/workers'),
   create: (name) => api.post('/workers', { name }),
   delete: (id) => api.delete(`/workers/${id}`),
+}
+
+// Analytics API
+export const analyticsAPI = {
+  getDashboard: () => api.get('/analytics'),
 }
 
 // AI API

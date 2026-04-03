@@ -266,12 +266,212 @@ app.delete('/api/customers/:id', async (req, res) => {
 });
 
 // ==================================================
-// 4. SETTINGS, WORKERS & AI API ROUTES
+// 4. SETTINGS, WORKERS, ANALYTICS & AI API ROUTES
 // ==================================================
 
 app.use('/api/settings', authenticateToken);
 app.use('/api/workers', authenticateToken);
 app.use('/api/ai', authenticateToken);
+app.use('/api/analytics', authenticateToken);
+
+// Dashboard Analytics
+app.get('/api/analytics', async (req, res) => {
+    try {
+        const now = new Date();
+        const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterdayStart = new Date(todayStart); yesterdayStart.setDate(yesterdayStart.getDate() - 1);
+        const thirtyDaysAgo = new Date(todayStart); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const thisWeekStart = new Date(todayStart); thisWeekStart.setDate(thisWeekStart.getDate() - thisWeekStart.getDay());
+        const lastWeekStart = new Date(thisWeekStart); lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+        const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+        const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+        const lastMonthEnd = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+        const yearStart = new Date(now.getFullYear(), 0, 1);
+
+        // Run all aggregations in parallel
+        const [
+            dailyRevenue,
+            monthlyRevenue,
+            paymentBreakdown,
+            topCustomers,
+            weekdayPattern,
+            todayOrders,
+            yesterdayOrders,
+            thisWeekOrders,
+            lastWeekOrders,
+            thisMonthOrders,
+            lastMonthOrders,
+            yearOrders,
+            totalOrders
+        ] = await Promise.all([
+            // 1. Daily revenue (last 30 days)
+            Order.aggregate([
+                { $match: { date: { $gte: thirtyDaysAgo } } },
+                { $group: {
+                    _id: { $dateToString: { format: '%Y-%m-%d', date: '$date' } },
+                    revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } },
+                    billed: { $sum: '$totalAmount' },
+                    count: { $sum: 1 }
+                }},
+                { $sort: { _id: 1 } }
+            ]),
+            // 2. Monthly revenue (last 12 months)
+            Order.aggregate([
+                { $match: { date: { $gte: new Date(now.getFullYear() - 1, now.getMonth(), 1) } } },
+                { $group: {
+                    _id: { $dateToString: { format: '%Y-%m', date: '$date' } },
+                    revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } },
+                    billed: { $sum: '$totalAmount' },
+                    count: { $sum: 1 }
+                }},
+                { $sort: { _id: 1 } }
+            ]),
+            // 3. Payment status breakdown
+            Order.aggregate([
+                { $group: {
+                    _id: '$paymentStatus',
+                    count: { $sum: 1 },
+                    amount: { $sum: '$totalAmount' }
+                }}
+            ]),
+            // 4. Top 5 customers by spending
+            Order.aggregate([
+                { $group: {
+                    _id: '$customerName',
+                    totalSpent: { $sum: '$totalAmount' },
+                    orderCount: { $sum: 1 }
+                }},
+                { $sort: { totalSpent: -1 } },
+                { $limit: 5 }
+            ]),
+            // 5. Orders by day of week
+            Order.aggregate([
+                { $group: {
+                    _id: { $dayOfWeek: '$date' },
+                    count: { $sum: 1 },
+                    revenue: { $sum: '$totalAmount' }
+                }},
+                { $sort: { _id: 1 } }
+            ]),
+            // 6. Today's orders
+            Order.aggregate([
+                { $match: { date: { $gte: todayStart } } },
+                { $group: {
+                    _id: null,
+                    count: { $sum: 1 },
+                    revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } },
+                    billed: { $sum: '$totalAmount' },
+                    pending: { $sum: { $cond: [{ $ne: ['$status', 'Delivered'] }, 1, 0] } }
+                }}
+            ]),
+            // 7. Yesterday's orders (for comparison)
+            Order.aggregate([
+                { $match: { date: { $gte: yesterdayStart, $lt: todayStart } } },
+                { $group: {
+                    _id: null,
+                    revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } },
+                    count: { $sum: 1 }
+                }}
+            ]),
+            // 8. This week orders
+            Order.aggregate([
+                { $match: { date: { $gte: thisWeekStart } } },
+                { $group: { _id: null, revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } }, count: { $sum: 1 } }}
+            ]),
+            // 9. Last week orders
+            Order.aggregate([
+                { $match: { date: { $gte: lastWeekStart, $lt: thisWeekStart } } },
+                { $group: { _id: null, revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } }, count: { $sum: 1 } }}
+            ]),
+            // 10. This month
+            Order.aggregate([
+                { $match: { date: { $gte: monthStart } } },
+                { $group: { _id: null, revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } }, billed: { $sum: '$totalAmount' }, count: { $sum: 1 } }}
+            ]),
+            // 11. Last month
+            Order.aggregate([
+                { $match: { date: { $gte: lastMonthStart, $lte: lastMonthEnd } } },
+                { $group: { _id: null, revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } }, count: { $sum: 1 } }}
+            ]),
+            // 12. Year total
+            Order.aggregate([
+                { $match: { date: { $gte: yearStart } } },
+                { $group: { _id: null, revenue: { $sum: { $cond: [{ $gt: ['$advanceAmount', 0] }, '$advanceAmount', { $cond: [{ $eq: ['$paymentStatus', 'Paid'] }, '$totalAmount', 0] }] } }, billed: { $sum: '$totalAmount' }, count: { $sum: 1 } }}
+            ]),
+            // 13. Total all-time orders count
+            Order.countDocuments()
+        ]);
+
+        const t = todayOrders[0] || { count: 0, revenue: 0, billed: 0, pending: 0 };
+        const y = yesterdayOrders[0] || { revenue: 0, count: 0 };
+        const tw = thisWeekOrders[0] || { revenue: 0, count: 0 };
+        const lw = lastWeekOrders[0] || { revenue: 0, count: 0 };
+        const tm = thisMonthOrders[0] || { revenue: 0, billed: 0, count: 0 };
+        const lm = lastMonthOrders[0] || { revenue: 0, count: 0 };
+        const yr = yearOrders[0] || { revenue: 0, billed: 0, count: 0 };
+
+        // Calculate percentage changes
+        const pctChange = (curr, prev) => prev > 0 ? Math.round(((curr - prev) / prev) * 100) : (curr > 0 ? 100 : 0);
+
+        // Day of week mapping
+        const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const weekdayData = dayNames.map((name, i) => {
+            const found = weekdayPattern.find(w => w._id === i + 1);
+            return { day: name, orders: found?.count || 0, revenue: found?.revenue || 0 };
+        });
+
+        // Collection rate (overall)
+        const totalBilled = yr.billed || 1;
+        const totalCollected = yr.revenue || 0;
+        const collectionRate = Math.min(100, Math.round((totalCollected / totalBilled) * 100));
+
+        res.json({
+            dailyRevenue,
+            monthlyRevenue,
+            paymentBreakdown: paymentBreakdown.map(p => ({
+                status: p._id || 'Unknown',
+                count: p.count,
+                amount: p.amount
+            })),
+            topCustomers: topCustomers.map(c => ({
+                name: c._id,
+                totalSpent: c.totalSpent,
+                orders: c.orderCount
+            })),
+            weekdayPattern: weekdayData,
+            today: {
+                orders: t.count,
+                revenue: t.revenue,
+                billed: t.billed,
+                pending: t.pending,
+                avgOrderValue: t.count > 0 ? Math.round(t.billed / t.count) : 0,
+                revenueChange: pctChange(t.revenue, y.revenue),
+                ordersChange: pctChange(t.count, y.count)
+            },
+            thisWeek: {
+                revenue: tw.revenue,
+                orders: tw.count,
+                change: pctChange(tw.revenue, lw.revenue)
+            },
+            thisMonth: {
+                revenue: tm.revenue,
+                billed: tm.billed,
+                orders: tm.count,
+                change: pctChange(tm.revenue, lm.revenue)
+            },
+            year: {
+                revenue: yr.revenue,
+                billed: yr.billed,
+                orders: yr.count
+            },
+            collectionRate,
+            totalOrders
+        });
+    } catch (error) {
+        console.error('GET /api/analytics error:', error.message);
+        res.status(500).json({ message: 'Failed to fetch analytics', error: error.message });
+    }
+});
 
 // AI Voice Parser
 app.post('/api/ai/parse-voice', async (req, res) => {

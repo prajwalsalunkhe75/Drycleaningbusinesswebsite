@@ -11,7 +11,12 @@ const __dirname = path.dirname(__filename)
 export default defineConfig({
    server: {
     port: 5173,
-    strictPort: true, // If 5173 is busy, it will FAIL instead of switching to 5174
+    strictPort: true,
+    allowedHosts: [
+      'e24fbeaf-b042-4f59-abbb-23ca3343f799-00-upza3ll3riqy.pike.replit.dev',
+      '.replit.dev',
+      '.repl.co'
+    ], // Explicitly allow Replit hosts
     proxy: {
       '/api': {
         target: 'http://localhost:3000',

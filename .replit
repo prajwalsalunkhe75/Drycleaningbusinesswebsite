@@ -1,0 +1,9 @@
+modules = ["nodejs-20", "typescript-language-server"]
+run = "npm install && npm run build && npm start"
+entrypoint = "server.js"
+
+[nix]
+channel = "stable-23_11"
+
+[httpServer]
+port = 3000
